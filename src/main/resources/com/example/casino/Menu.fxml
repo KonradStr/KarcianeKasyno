@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1250.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.Controllers.MenuController">
+   <children>
+      <HBox prefHeight="750.0" prefWidth="1250.0">
+         <children>
+            <StackPane prefHeight="150.0" prefWidth="200.0">
+               <children>
+                  <ImageView fitHeight="720.0" fitWidth="625.0" opacity="0.51" pickOnBounds="true">
+                     <image>
+                        <Image url="@../../../images/pokerbg.png" />
+                     </image>
+                     <effect>
+                        <GaussianBlur radius="11.77" />
+                     </effect>
+                  </ImageView>
+                  <Rectangle arcHeight="5.0" arcWidth="100.0" fill="#808489" height="439.0" opacity="0.83" stroke="BLACK" strokeLineCap="BUTT" strokeLineJoin="BEVEL" strokeWidth="0.5" width="501.0">
+                     <effect>
+                        <GaussianBlur radius="2.0" />
+                     </effect>
+                  </Rectangle>
+                  <AnchorPane prefHeight="750.0" prefWidth="627.0">
+                     <children>
+                        <Label alignment="CENTER" layoutX="4.0" layoutY="72.0" prefHeight="71.0" prefWidth="627.0" text="POKER">
+                           <font>
+                              <Font name="Microsoft JhengHei Bold" size="51.0" />
+                           </font>
+                           <effect>
+                              <Glow />
+                           </effect>
+                        </Label>
+                        <Button fx:id="CreateButton" layoutX="171.0" layoutY="506.0" mnemonicParsing="false" onAction="#createGame" prefHeight="60.0" prefWidth="262.0" text="Stwórz grę">
+                           <font>
+                              <Font size="22.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="JoinButton" layoutX="171.0" layoutY="340.0" mnemonicParsing="false" onAction="#joinGame" prefHeight="60.0" prefWidth="262.0" text="Dołącz">
+                           <font>
+                              <Font size="22.0" />
+                           </font>
+                        </Button>
+                        <TextField fx:id="gameID" layoutX="83.0" layoutY="271.0" prefHeight="52.0" prefWidth="462.0" />
+                        <Label alignment="CENTER" layoutX="-2.0" layoutY="224.0" prefHeight="34.0" prefWidth="631.0" text="Podaj kod gry aby dołączyć">
+                           <font>
+                              <Font name="Microsoft YaHei" size="25.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER" layoutX="3.0" layoutY="446.0" prefHeight="18.0" prefWidth="617.0" text="Lub utwórz nową gre">
+                           <font>
+                              <Font name="Microsoft YaHei" size="25.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </StackPane>
+            <StackPane prefHeight="750.0" prefWidth="561.0">
+               <children>
+                  <ImageView fitHeight="720.0" fitWidth="625.0" opacity="0.51" pickOnBounds="true">
+                     <image>
+                        <Image url="@../../../images/remikbg.png" />
+                     </image>
+                     <effect>
+                        <GaussianBlur radius="11.77" />
+                     </effect>
+                  </ImageView>
+                  <Rectangle arcHeight="5.0" arcWidth="100.0" fill="#808489" height="439.0" opacity="0.83" stroke="BLACK" strokeLineCap="BUTT" strokeLineJoin="BEVEL" strokeWidth="0.5" width="501.0">
+                     <effect>
+                        <GaussianBlur radius="2.0" />
+                     </effect>
+                  </Rectangle>
+                  <AnchorPane prefHeight="750.0" prefWidth="620.0">
+                     <children>
+                        <Button fx:id="LogoutButton" layoutX="-46.0" layoutY="674.0" mnemonicParsing="false" onAction="#LogOut" prefHeight="52.0" prefWidth="91.0" text="Wyloguj się" />
+                        <Label alignment="CENTER" layoutX="4.0" layoutY="74.0" prefHeight="71.0" prefWidth="627.0" text="REMIK">
+                           <font>
+                              <Font name="Microsoft JhengHei Bold" size="51.0" />
+                           </font>
+                           <effect>
+                              <Glow />
+                           </effect>
+                        </Label>
+                        <Button fx:id="CreateButton1" layoutX="189.0" layoutY="509.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="262.0" text="Stwórz grę">
+                           <font>
+                              <Font size="22.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="JoinButton1" layoutX="189.0" layoutY="339.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="262.0" text="Dołącz">
+                           <font>
+                              <Font size="22.0" />
+                           </font>
+                        </Button>
+                        <TextField fx:id="gameID1" layoutX="82.0" layoutY="269.0" prefHeight="52.0" prefWidth="462.0" />
+                        <Label alignment="CENTER" layoutX="5.0" layoutY="225.0" prefHeight="34.0" prefWidth="631.0" text="Podaj kod gry aby dołączyć(jeszcze nie))">
+                           <font>
+                              <Font name="Microsoft YaHei" size="25.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER" layoutX="5.0" layoutY="448.0" prefHeight="18.0" prefWidth="617.0" text="Lub utwórz nową gre">
+                           <font>
+                              <Font name="Microsoft YaHei" size="25.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="minimize" layoutX="553.0" layoutY="1.0" mnemonicParsing="false" onAction="#minimizeWindow" prefHeight="21.0" prefWidth="30.0" style="-fx-background-color: transparent;" text="_" textFill="#202020">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                           <padding>
+                              <Insets top="-7.0" />
+                           </padding>
+                        </Button>
+                        <Button fx:id="exit" graphicTextGap="2.0" layoutX="584.0" layoutY="1.0" mnemonicParsing="false" onAction="#closeWindow" prefHeight="21.0" prefWidth="30.0" style="-fx-background-color: transparent;" text="x" textFill="#3b3939">
+                           <font>
+                              <Font name="System Bold" size="21.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="-3.0" top="-3.0" />
+                           </padding>
+                        </Button>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </StackPane>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>
