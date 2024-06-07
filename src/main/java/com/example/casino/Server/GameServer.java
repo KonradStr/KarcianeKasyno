@@ -4,13 +4,19 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GameServer {
     private ServerSocket serverSocket;
     public static String connectionUrl = "jdbc:mysql://i3m.h.filess.io:3307/JavaProject_fourthtalk";
     public static Map<String, PokerGame> pokerGames = new HashMap<>();
+    public static Map<String, RummyGame> rummyGames = new HashMap<>();
+
+    public static ExecutorService executorService;
 
     public void start(int port) throws IOException {
+        executorService = Executors.newFixedThreadPool(100);
         serverSocket = new ServerSocket(port);
         System.out.println("---------- URUCHOMIONO SERWER ----------\n");
         System.out.println("ADRES IP SERWERA: " + serverSocket.getInetAddress());

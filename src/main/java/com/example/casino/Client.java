@@ -1,9 +1,6 @@
 package com.example.casino;
 
-import com.example.casino.Controllers.LobbyController;
-import com.example.casino.Controllers.LoginController;
-import com.example.casino.Controllers.MenuController;
-import com.example.casino.Controllers.RegisterController;
+import com.example.casino.Controllers.*;
 import com.example.casino.Packets.*;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -24,9 +21,12 @@ public class Client extends Thread{
     public ObjectOutputStream out;
     private ObjectInputStream in;
     private LoginController lc;
-    private LobbyController lbc;
+    private PokerLobbyController plbc;
+
+    private RummyLobbyController rlbc;
     private MenuController mc;
     private RegisterController rc;
+    private PokerTableController ptc;
 
 
     public void run(){
@@ -55,7 +55,7 @@ public class Client extends Thread{
                 System.out.println("Ustanowiono połączenie z serwerem");
                 break;
             case LOGIN: {
-                LoginPacket loginRespone = (LoginPacket)respone;
+                LoginPacket loginRespone = (LoginPacket) respone;
                 String data = loginRespone.getDesc();
                 LoginPacket.Status status = loginRespone.getStatus();
                 if (status.equals(LoginPacket.Status.LOGIN)) {
@@ -65,22 +65,22 @@ public class Client extends Thread{
                     Platform.runLater(() ->
                             openMenu()
                     );
-                }else if (status.equals(LoginPacket.Status.LOGOUT)){
-                        System.out.println("Wylogowano");
-                        Platform.runLater(() ->
-                                logOut()
-                        );
+                } else if (status.equals(LoginPacket.Status.LOGOUT)) {
+                    System.out.println("Wylogowano");
+                    Platform.runLater(() ->
+                            logOut()
+                    );
                 } else if (status.equals(LoginPacket.Status.PASWWORD_ERROR)) {
                     System.out.println(data);
                     Platform.runLater(() ->
                             showLoginErr("PODANO NIEPOPRAWNE HASŁO")
                     );
-                }else if(status.equals(LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR)){
+                } else if (status.equals(LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR)) {
                     System.out.println(data);
                     Platform.runLater(() ->
                             showLoginErr("NIE ISTNIEJE TAKIE KONTO")
                     );
-                }else{
+                } else {
                     System.err.println("NIE ZNANE DANE: " + data);
                 }
                 break;
@@ -89,7 +89,7 @@ public class Client extends Thread{
                 RegisterPacket registerRespone = (RegisterPacket) respone;
                 String data = registerRespone.getDesc();
                 RegisterPacket.Status status = registerRespone.getStatus();
-                if (status.equals(RegisterPacket.Status.REGISTER)){
+                if (status.equals(RegisterPacket.Status.REGISTER)) {
                     System.out.println("Zarejestrowano");
                     Main.player = registerRespone.getPlayer();
                     Platform.runLater(() ->
@@ -100,35 +100,41 @@ public class Client extends Thread{
                     Platform.runLater(() ->
                             showRegisterErr("TAKIE KONTO JUŻ ISTNIEJE")
                     );
-                }else{
+                } else {
                     System.err.println("NIE ZNANE DANE: " + data);
                 }
                 break;
-            }case CREATEGAME:{
-                String data = respone.getDesc();
-                if (data.split(":")[0].equals("GameCreated")){
+            }
+            case CREATEGAME: {
+                CreateGamePacket createGamePacket = (CreateGamePacket) respone;
+                String data = createGamePacket.getDesc();
+                if (data.split(":")[0].equals("GameCreated")) {
                     System.out.println("utworzono gre");
+                    System.out.println(createGamePacket.getGameType());
                     Platform.runLater(() ->
-                            openLobby(data.split(":")[1], new ArrayList<>(List.of(Main.player)))
+                            openLobby(String.valueOf(createGamePacket.getGameType()),createGamePacket.getUUID(), new ArrayList<>(List.of(Main.player)))
                     );
                 }
                 break;
-            }case JOINGAME:{
+            }
+            case JOINGAME: {
                 JoinGamePacket joinGamePacket = (JoinGamePacket) respone;
                 String data = joinGamePacket.getDesc();
                 JoinGamePacket.Status status = joinGamePacket.getStatus();
-                if (status.equals(JoinGamePacket.Status.JOINED)){
+                JoinGamePacket.GameType gameType = joinGamePacket.getGameType();
+                if (status.equals(JoinGamePacket.Status.JOINED)) {
                     System.out.println("dołączono do gry");
+                    System.out.println(gameType);
                     Platform.runLater(() ->
-                            openLobby(joinGamePacket.getUUID(), joinGamePacket.getPlayers())
+                            openLobby(String.valueOf(gameType), joinGamePacket.getUUID(), joinGamePacket.getPlayers())
                     );
                 } else if (status.equals(JoinGamePacket.Status.USER_JOIN)) {
                     System.out.println("Dołączył nowy gracz");
                     System.out.println("Player:" + joinGamePacket.getPlayer().getPlayerData());
                     Platform.runLater(() ->
-                            refreshLobby(true, joinGamePacket.getPlayer())
+                            refreshLobby(String.valueOf(gameType), true, joinGamePacket.getPlayer())
                     );
-                }else if (status.equals(JoinGamePacket.Status.LEFT)) {
+                } else if (status.equals(JoinGamePacket.Status.LEFT)) {
                     System.out.println("Opuszczono lobby");
                     Platform.runLater(() ->
                             leaveLobby()
@@ -136,23 +142,37 @@ public class Client extends Thread{
                 } else if (status.equals(JoinGamePacket.Status.USER_LEFT)) {
                     System.out.println("użytkownik opuścił lobby");
                     Platform.runLater(() ->
-                            refreshLobby(false, joinGamePacket.getPlayer())
+                            refreshLobby(String.valueOf(gameType),false, joinGamePacket.getPlayer())
                     );
                 }
                 break;
-            }case GAME_READY_STATUS: {
+            }
+            case GAME_READY_STATUS: {
                 GameReadyPacket gameReadyPacket = (GameReadyPacket) respone;
                 GameReadyPacket.Status status = gameReadyPacket.getStatus();
-                if (status.equals(GameReadyPacket.Status.READY)){
+                GameReadyPacket.GameType gameType = gameReadyPacket.getGameType();
+                if (status.equals(GameReadyPacket.Status.READY)) {
                     Platform.runLater(() ->
-                            changeStatus(true, gameReadyPacket.getPlayer())
+                            changeStatus(String.valueOf(gameType), true, gameReadyPacket.getPlayer())
                     );
-                }else{
+                } else {
                     Platform.runLater(() ->
-                            changeStatus(false, gameReadyPacket.getPlayer())
+                            changeStatus(String.valueOf(gameType), false, gameReadyPacket.getPlayer())
                     );
                 }
                 break;
+            }
+            case GAME:{
+                GamePacket gamePacket = (GamePacket) respone;
+                GamePacket.Status status = gamePacket.getStatus();
+                if (status.equals(GamePacket.Status.START)){
+                    Platform.runLater(() ->
+                            startGame()
+                    );
+                }
+            }
+            {
+
             }default:{
                 System.err.println("NIEZNANY PAKIET");
             }
@@ -193,45 +213,91 @@ public class Client extends Thread{
     }
 
 
-    private void openLobby(String uuid, List<Player> players){
+    private void openLobby(String gameType, String uuid, List<Player> players){
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Lobby.fxml"));
-            Parent root = loader.load();
-            this.lbc = loader.getController();
-            Main.stage.close();
-            Main.stage.setTitle("Lobby");
-            Main.stage.setScene(new Scene(root));
-            Main.stage.show();
-            lbc.setUuid(uuid);
-            for (Player p : players) {
-                lbc.addPlayer(p);
+            if (gameType.equals("POKER")){
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerLobby.fxml"));
+                Parent root = loader.load();
+                this.plbc = loader.getController();
+                Main.stage.close();
+                Main.stage.setTitle("Lobby");
+                Main.stage.setScene(new Scene(root));
+                Main.stage.show();
+                plbc.setUuid(uuid);
+                for (Player p : players) {
+                    plbc.addPlayer(p);
+                }
+                plbc.refreshPlayerContainer();
+            }else{
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("RummyLobby.fxml"));
+                Parent root = loader.load();
+                this.rlbc = loader.getController();
+                Main.stage.close();
+                Main.stage.setTitle("Lobby");
+                Main.stage.setScene(new Scene(root));
+                Main.stage.show();
+                rlbc.setUuid(uuid);
+                for (Player p : players) {
+                    rlbc.addPlayer(p);
+                }
+                rlbc.refreshPlayerContainer();
             }
-            lbc.refreshPlayerContainer();
         }catch(IOException e){
             e.printStackTrace();
             System.err.println("error in loading table");
         }
-
     }
 
-    private void refreshLobby(boolean join, Player player){
-        if (join) {
-            lbc.addPlayer(player);
-            lbc.refreshPlayerContainer();
+    private void refreshLobby(String gameType, boolean join, Player player){
+        if (gameType.equals("POKER")) {
+            if (join) {
+                plbc.addPlayer(player);
+                plbc.refreshPlayerContainer();
+            } else {
+                plbc.removePlayer(player);
+                plbc.refreshPlayerContainer();
+            }
         }else{
-            lbc.removePlayer(player);
-            lbc.refreshPlayerContainer();
+            if (join) {
+                rlbc.addPlayer(player);
+                rlbc.refreshPlayerContainer();
+            } else {
+                rlbc.removePlayer(player);
+                rlbc.refreshPlayerContainer();
+            }
         }
     }
 
     private void leaveLobby(){
-        lbc = null;
+        plbc = null;
+        rlbc = null;
         openMenu();
     }
 
-    private void changeStatus(boolean isReady, Player player){
-        lbc.changeStatus(isReady, player);
-        lbc.refreshPlayerContainer();
+    private void changeStatus(String gameType, boolean isReady, Player player){
+        System.out.println(gameType);
+        if (gameType.equals("POKER")) {
+            plbc.changeStatus(isReady, player);
+            plbc.refreshPlayerContainer();
+        }else{
+            rlbc.changeStatus(isReady, player);
+            rlbc.refreshPlayerContainer();
+        }
+    }
+
+
+    private void startGame(){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerTable.fxml"));
+            Parent root = loader.load();
+            this.ptc = loader.getController();
+            Main.stage.close();
+            Main.stage.setScene(new Scene(root));
+            Main.stage.show();
+        }catch(IOException e){
+            e.printStackTrace();
+            System.err.println("error in loading table");
+        }
     }
 
 

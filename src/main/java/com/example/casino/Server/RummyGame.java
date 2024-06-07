@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class PokerGame implements Callable<Player> {
+public class RummyGame implements Callable<Player> {
+
     String id;
 
     int playersReady;
@@ -16,14 +17,14 @@ public class PokerGame implements Callable<Player> {
     List<ClientHandler> players;
     List<Player> playersData;
 
-    public PokerGame(String id) {
+    public RummyGame(String id) {
         playersReady = 0;
         players = new ArrayList<>();
         playersData = new ArrayList<>();
         this.id = id;
     }
 
-    public PokerGame(String id, ClientHandler ch) {
+    public RummyGame(String id, ClientHandler ch) {
         playersReady = 0;
         players = new ArrayList<>();
         playersData = new ArrayList<>();

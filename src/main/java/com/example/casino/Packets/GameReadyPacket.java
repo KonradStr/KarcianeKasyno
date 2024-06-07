@@ -12,23 +12,37 @@ public class GameReadyPacket extends Packet{
         NOT_READY,
     }
 
+    public enum GameType{
+        POKER,
+        RUMMY,
+    }
+
+    private GameType gameType;
     private Status status;
     public GameReadyPacket(String data, Status status) {
         super(PacketType.GAME_READY_STATUS, data);
         this.status = status;
     }
 
-    public GameReadyPacket(String data, Player player, String uuid, Status status) {
+    public GameReadyPacket(String data, GameType gameType, Player player, String uuid, Status status) {
         super(PacketType.GAME_READY_STATUS, data);
         this.player = player;
         this.UUID = uuid;
         this.status = status;
+        this.gameType = gameType;
     }
 
     public GameReadyPacket(String data, String uuid, Status status) {
         super(PacketType.GAME_READY_STATUS, data);
         this.UUID = uuid;
         this.status = status;
+    }
+
+    public GameReadyPacket(String data, GameType gameType, String uuid, Status status) {
+        super(PacketType.GAME_READY_STATUS, data);
+        this.UUID = uuid;
+        this.status = status;
+        this.gameType = gameType;
     }
 
     public String getUUID() {
@@ -41,5 +55,9 @@ public class GameReadyPacket extends Packet{
 
     public Status getStatus() {
         return status;
+    }
+
+    public GameType getGameType() {
+        return gameType;
     }
 }

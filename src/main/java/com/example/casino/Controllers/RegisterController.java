@@ -58,7 +58,7 @@ public class RegisterController implements Initializable {
     @FXML
     private void goToLogin(){
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/casino/login.fxml"));
             Parent root = loader.load();
             Main.stage.setScene(new Scene(root));
             Main.stage.sizeToScene();

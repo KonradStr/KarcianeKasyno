@@ -6,6 +6,7 @@ import com.example.casino.Packets.GameReadyPacket;
 import com.example.casino.Packets.JoinGamePacket;
 import com.example.casino.Player;
 import com.example.casino.Server.PokerGame;
+import com.example.casino.Server.RummyGame;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -19,7 +20,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LobbyController {
+public class RummyLobbyController {
 
     private boolean isReady;
     @FXML
@@ -33,7 +34,7 @@ public class LobbyController {
 
     @FXML
     private Button ReadyButton;
-    private PokerGame pokerGame;
+    private RummyGame rummyGame;
 
     private Map<Integer, Player> players = new HashMap<>();
 
@@ -41,8 +42,8 @@ public class LobbyController {
         this.uuid.setText(uuid);
     }
 
-    public void setPokerGame(PokerGame pokerGame){
-        this.pokerGame = pokerGame;
+    public void setRummyGame(RummyGame RummyGame){
+        this.rummyGame = rummyGame;
     }
 
     public void refreshPlayerContainer(){
@@ -74,7 +75,7 @@ public class LobbyController {
 
     @FXML
     public void leaveGame(){
-        Main.client.sendPacket(new JoinGamePacket("leave", uuid.getText(), JoinGamePacket.Status.LEAVE));
+        Main.client.sendPacket(new JoinGamePacket("leave", uuid.getText(), JoinGamePacket.GameType.RUMMY ,JoinGamePacket.Status.LEAVE));
     }
 
     public void addPlayer(Player player){
@@ -97,11 +98,11 @@ public class LobbyController {
 
     public void ready(){
         if (!isReady) {
-            Main.client.sendPacket(new GameReadyPacket( "ready", uuid.getText(), GameReadyPacket.Status.READY));
+            Main.client.sendPacket(new GameReadyPacket( "ready", GameReadyPacket.GameType.RUMMY, uuid.getText(), GameReadyPacket.Status.READY));
             isReady = true;
             ReadyButton.setText("Not Ready");
         }else{
-            Main.client.sendPacket(new GameReadyPacket("notready", uuid.getText(), GameReadyPacket.Status.NOT_READY));
+            Main.client.sendPacket(new GameReadyPacket("notready",GameReadyPacket.GameType.RUMMY,  uuid.getText(), GameReadyPacket.Status.NOT_READY));
             isReady = false;
             ReadyButton.setText("Ready");
         }

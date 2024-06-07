@@ -1,10 +1,7 @@
 package com.example.casino.Controllers;
 
 import com.example.casino.Main;
-import com.example.casino.Packets.JoinGamePacket;
-import com.example.casino.Packets.LoginPacket;
-import com.example.casino.Packets.Packet;
-import com.example.casino.Packets.PacketType;
+import com.example.casino.Packets.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -32,20 +29,42 @@ public class MenuController {
     private TextField gameID;
 
     @FXML
-    public void createGame(){
+    private TextField gameID1;
+
+    @FXML
+    public void createPokerGame(){
         String uniqueID = UUID.randomUUID().toString();
         System.out.println(uniqueID);
-        Packet p = new Packet(PacketType.CREATEGAME, uniqueID);
+        Packet p = new CreateGamePacket("game creation", uniqueID, CreateGamePacket.GameType.POKER);
         Main.client.sendPacket(p);
     }
 
     @FXML
-    public void joinGame(){
+    public void createRummyGame(){
+        String uniqueID = UUID.randomUUID().toString();
+        System.out.println(uniqueID);
+        Packet p = new CreateGamePacket("game creation", uniqueID, CreateGamePacket.GameType.RUMMY);
+        Main.client.sendPacket(p);
+    }
+
+    @FXML
+    public void joinPokerGame(){
         String uuid = gameID.getText();
         if (uuid.isEmpty()){
             System.out.println("tutaj error");
         }else {
-            JoinGamePacket packet = new JoinGamePacket("JOIN", uuid, JoinGamePacket.Status.JOIN);
+            JoinGamePacket packet = new JoinGamePacket("JOIN", uuid, JoinGamePacket.GameType.POKER, JoinGamePacket.Status.JOIN);
+            Main.client.sendPacket(packet);
+        }
+    }
+
+    @FXML
+    public void joinRummyGame(){
+        String uuid = gameID1.getText();
+        if (uuid.isEmpty()){
+            System.out.println("tutaj error");
+        }else {
+            JoinGamePacket packet = new JoinGamePacket("JOIN", uuid, JoinGamePacket.GameType.RUMMY, JoinGamePacket.Status.JOIN);
             Main.client.sendPacket(packet);
         }
     }

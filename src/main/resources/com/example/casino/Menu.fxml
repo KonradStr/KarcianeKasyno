@@ -43,12 +43,12 @@
                               <Glow />
                            </effect>
                         </Label>
-                        <Button fx:id="CreateButton" layoutX="171.0" layoutY="506.0" mnemonicParsing="false" onAction="#createGame" prefHeight="60.0" prefWidth="262.0" text="Stwórz grę">
+                        <Button fx:id="CreateButton" layoutX="171.0" layoutY="506.0" mnemonicParsing="false" onAction="#createPokerGame" prefHeight="60.0" prefWidth="262.0" text="Stwórz grę">
                            <font>
                               <Font size="22.0" />
                            </font>
                         </Button>
-                        <Button fx:id="JoinButton" layoutX="171.0" layoutY="340.0" mnemonicParsing="false" onAction="#joinGame" prefHeight="60.0" prefWidth="262.0" text="Dołącz">
+                        <Button fx:id="JoinButton" layoutX="171.0" layoutY="340.0" mnemonicParsing="false" onAction="#joinPokerGame" prefHeight="60.0" prefWidth="262.0" text="Dołącz">
                            <font>
                               <Font size="22.0" />
                            </font>
@@ -94,12 +94,12 @@
                               <Glow />
                            </effect>
                         </Label>
-                        <Button fx:id="CreateButton1" layoutX="189.0" layoutY="509.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="262.0" text="Stwórz grę">
+                        <Button fx:id="CreateButton1" layoutX="189.0" layoutY="509.0" mnemonicParsing="false" onAction="#createRummyGame" prefHeight="60.0" prefWidth="262.0" text="Stwórz grę">
                            <font>
                               <Font size="22.0" />
                            </font>
                         </Button>
-                        <Button fx:id="JoinButton1" layoutX="189.0" layoutY="339.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="262.0" text="Dołącz">
+                        <Button fx:id="JoinButton1" layoutX="189.0" layoutY="339.0" mnemonicParsing="false" onAction="#joinRummyGame" prefHeight="60.0" prefWidth="262.0" text="Dołącz">
                            <font>
                               <Font size="22.0" />
                            </font>
