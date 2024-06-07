@@ -11,24 +11,21 @@ import java.sql.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static com.example.casino.Server.GameServer.connection;
+
 public class ClientHandler extends Thread {
     private Player player;
     private Socket clientSocket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
-    private Connection connection;
 
     public ClientHandler(Socket socket) {
         this.clientSocket = socket;
         try {
-            connection = DriverManager.getConnection(GameServer.connectionUrl, "JavaProject_fourthtalk", "26c741dadf126863995c714674f8a4c681c4dfb3");
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
             System.err.println("Błąd połączenia komunikacyjnego z klientem");
-        }catch (SQLException e) {
-            System.err.println("Błąd łączenia z bazą danych");
-            System.out.println(e);
         }
     }
 
