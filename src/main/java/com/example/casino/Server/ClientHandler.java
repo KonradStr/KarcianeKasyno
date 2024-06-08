@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -32,6 +33,9 @@ public class ClientHandler extends Thread {
         }
     }
 
+    public PokerHand.Ranks hand() {
+        return  player.pokerHand.rank();
+    }
     public void run() {
         Packet request;
         while (true) {
@@ -205,9 +209,9 @@ public class ClientHandler extends Thread {
                         player.setReady(true);
                         GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType, player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.pokerGames.get(uuid).playersReady == 2) {
-                            Future<Player> future = GameServer.executorService.submit(GameServer.pokerGames.get(uuid));
+                            Future<ArrayList<ClientHandler>> future = GameServer.executorService.submit(GameServer.pokerGames.get(uuid));
                             try {
-                                System.out.println(future.get().getPlayerData());
+                                System.out.println(future.get());
                             } catch (InterruptedException | ExecutionException e) {
                                 throw new RuntimeException(e);
                             }

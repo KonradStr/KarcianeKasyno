@@ -25,4 +25,8 @@ public enum Rank {
             entry("King", "k"),
             entry("Ace", "a")
     );
+
+    public static int getIntValue(Rank r){
+        return r.ordinal();
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.casino.Server;
 
-import com.example.casino.Client;
 import com.example.casino.Packets.GamePacket;
 import com.example.casino.Packets.Packet;
 import com.example.casino.Player;
@@ -12,20 +11,39 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class PokerGame implements Callable<Player> {
+public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     String id;
 
     int playersReady;
 
     List<ClientHandler> players;
     List<Player> playersData;
+    ArrayList<Karta> tableCards;
+    private Talia deck = new Talia(false);
     final Lock lock = new ReentrantLock();
     final Condition next = lock.newCondition();
+    private ArrayList<ClientHandler> Winners() {
+        ClientHandler highestHand = players.get(0);
+        for (ClientHandler ch:
+             players) {
+            if(ch.hand().getRank() > highestHand.hand().getRank())
+                highestHand = ch;
+        }
+        ArrayList<ClientHandler> ret = new ArrayList<>();
+        for (ClientHandler ch:
+             players) {
+            if(ch.hand().getRank() == highestHand.hand().getRank())
+                ret.add(ch);
+        }
+        return ret;
+    }
+
     boolean nextPlayer = false;
     Object monitorObj = new Object();
 
     Talia talia;
     int moneyPool;
+
 
 
     public PokerGame(String id) {
@@ -55,11 +73,16 @@ public class PokerGame implements Callable<Player> {
     }
 
     @Override
-    public Player call() throws Exception {
+    public ArrayList<ClientHandler> call() throws Exception {
+        this.tableCards = new ArrayList<>();
         Thread.sleep(1000);
         talia.SzuflujTalie();
+        for (int i = 0; i < 5; i++) {
+            this.tableCards.add(talia.KartaZTalii());
+        }
         for (Player p : playersData){
             p.setMoney(1000);
+            p.pokerHand.addHand(tableCards);
         }
         List<Player> otherPlayers = new ArrayList<>();
         for (int i = 0; i < players.size(); i++){
@@ -151,7 +174,7 @@ public class PokerGame implements Callable<Player> {
          */
 
 
-        return playersData.get(0);
+        return Winners();
     }
 
 
