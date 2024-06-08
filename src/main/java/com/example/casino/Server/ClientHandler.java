@@ -18,6 +18,7 @@ public class ClientHandler extends Thread {
     private Socket clientSocket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
+    private Object monitorObj;
 
     private String UUID;
 
@@ -241,8 +242,13 @@ public class ClientHandler extends Thread {
                 GamePacket.Status gamePacketStatus = gamePacket.getStatus();
                 if (gamePacketStatus.equals(GamePacket.Status.MOVE)){
                     System.out.println("kliknieto");
-                    GameServer.pokerGames.get(this.UUID).nextPlayer();
+                    this.monitorObj = GameServer.pokerGames.get(this.UUID).getMonitorObj();
+                    synchronized (monitorObj){
+                        this.monitorObj.notify();
+                    }
+                    System.out.println("to dziala dalej");
                 }
+                break;
 
             }default:{
                 System.err.println("NIEZNANY PAKIET");

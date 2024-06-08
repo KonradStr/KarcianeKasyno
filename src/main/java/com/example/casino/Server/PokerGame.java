@@ -20,6 +20,7 @@ public class PokerGame implements Callable<Player> {
     List<Player> playersData;
     final Lock lock = new ReentrantLock();
     final Condition next = lock.newCondition();
+    Object monitorObj = new Object();
 
 
     public PokerGame(String id) {
@@ -54,18 +55,20 @@ public class PokerGame implements Callable<Player> {
 
         for (ClientHandler ch : players) {
             System.out.println(ch.getPlayer().getPlayerData());
-            synchronized (next) {
+            synchronized (monitorObj) {
                 ch.sendPacket(new GamePacket("twój ruch", GamePacket.Status.MOVE));
-                next.await();
+                System.out.println("wysłano");
+                monitorObj.wait();
             }
+            System.out.println("next iteration");
         }
 
         return playersData.get(0);
     }
 
-    public void nextPlayer(){
-        synchronized (next) {
-            next.signal();
-        }
+
+
+    public Object getMonitorObj() {
+        return monitorObj;
     }
 }
