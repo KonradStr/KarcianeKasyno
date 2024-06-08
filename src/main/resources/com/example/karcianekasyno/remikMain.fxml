@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #006638;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.karcianekasyno.RemikMain">
    <top>
@@ -238,86 +239,86 @@
       </VBox>
    </right>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="200.0" prefWidth="1920.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="1920.0" BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="202.0" prefWidth="822.0">
+            <HBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="823.0">
                <children>
-                  <ImageView fx:id="pc1" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc1Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc1" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="30.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc2" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc2Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc2" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc3" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc3Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc3" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc4" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc4Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc4" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc5" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc5Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc5" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc6" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc6Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc6" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc7" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc7Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc7" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc8" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc8Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc8" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc9" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc9Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc9" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc10" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc10Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc10" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc11" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc11Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc11" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc12" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc12Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc12" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc13" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc13Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc13" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
-                  <ImageView fx:id="pc14" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pc14Clicked" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="pc14" fitHeight="150.0" fitWidth="103.0" onMouseClicked="#pcClicked" pickOnBounds="true" preserveRatio="true">
                      <HBox.margin>
                         <Insets left="-50.0" />
                      </HBox.margin>
                   </ImageView>
                </children>
                <HBox.margin>
-                  <Insets />
+                  <Insets left="250.0" />
                </HBox.margin>
             </HBox>
-            <HBox prefHeight="222.0" prefWidth="566.0">
+            <HBox prefHeight="200.0" prefWidth="526.0">
                <children>
                   <BorderPane prefHeight="222.0" prefWidth="630.0">
                      <center>
@@ -328,10 +329,13 @@
                            <children>
                               <VBox alignment="CENTER" prefHeight="160.0" prefWidth="535.0">
                                  <children>
-                                    <Label fx:id="infoDisplay" text="tego typu">
+                                    <Label fx:id="infoDisplay" contentDisplay="CENTER" text="Rozpoczynanie ..." textAlignment="CENTER" textFill="WHITE">
                                        <VBox.margin>
                                           <Insets bottom="15.0" />
                                        </VBox.margin>
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
                                     </Label>
                                     <HBox alignment="CENTER" prefHeight="39.0" prefWidth="413.0">
                                        <children>
@@ -345,38 +349,22 @@
                                                 <Insets left="10.0" right="10.0" />
                                              </HBox.margin>
                                           </Button>
-                                          <Button fx:id="tryToLayOffButton" mnemonicParsing="false" onAction="#tryToLayOff" text="Wyłóż karty">
-                                             <HBox.margin>
-                                                <Insets left="10.0" right="10.0" />
-                                             </HBox.margin>
-                                          </Button>
                                        </children>
                                        <VBox.margin>
                                           <Insets />
                                        </VBox.margin>
                                     </HBox>
-                                    <HBox alignment="CENTER" prefHeight="25.0" prefWidth="413.0">
-                                       <children>
-                                          <Button fx:id="finishLayOffButton" mnemonicParsing="false" onAction="#finishLayOff" text="Zakończ">
-                                             <HBox.margin>
-                                                <Insets left="10.0" right="10.0" />
-                                             </HBox.margin>
-                                          </Button>
-                                          <Button fx:id="addToLayOffButton" mnemonicParsing="false" onAction="#addToLayOff" text="Dodaj do wyłożonych">
-                                             <HBox.margin>
-                                                <Insets left="10.0" right="10.0" />
-                                             </HBox.margin>
-                                          </Button>
-                                          <Button fx:id="cancelLayOffButton" mnemonicParsing="false" onAction="#cancelLayOff" text="Anuluj">
-                                             <HBox.margin>
-                                                <Insets left="10.0" right="10.0" />
-                                             </HBox.margin>
-                                          </Button>
-                                       </children>
-                                    </HBox>
                                     <HBox alignment="CENTER" prefHeight="30.0" prefWidth="413.0">
                                        <children>
-                                          <Button fx:id="confirmDiscardButton" mnemonicParsing="false" onAction="#confirmDiscard" text="Potwierdź" />
+                                          <Button fx:id="tryToLayOffButton" mnemonicParsing="false" onAction="#tryToLayOff" text="Wyłóż karty">
+                                             <HBox.margin>
+                                                <Insets left="10.0" right="10.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                          <Button fx:id="confirmDiscardButton" mnemonicParsing="false" onAction="#confirmDiscard" text="Odrzuć wybraną kartę">
+                                             <HBox.margin>
+                                                <Insets left="10.0" right="10.0" />
+                                             </HBox.margin></Button>
                                        </children>
                                     </HBox>
                                  </children>
@@ -395,22 +383,29 @@
                   </BorderPane>
                </children>
                <HBox.margin>
-                  <Insets left="100.0" />
+                  <Insets left="50.0" />
                </HBox.margin>
             </HBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="273.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#startGameTest" text="Start" />
+                  <Label fx:id="cardsLeft" text="temp" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin></Label>
+               </children>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </VBox>
          </children>
       </HBox>
    </bottom>
    <center>
-      <VBox prefHeight="772.0" prefWidth="1464.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <VBox alignment="CENTER" prefHeight="704.0" prefWidth="1464.0" style="-fx-background-color: #00512C; -fx-background-radius: 40 40 40 40;">
-               <children>
-                  <Button mnemonicParsing="false" onAction="#startGameTest" text="Button" />
-                  <Label fx:id="cardsLeft" text="temp" />
-               </children>
-            </VBox>
+            <HBox fx:id="middleBoard" alignment="CENTER" prefHeight="708.0" prefWidth="1555.0" style="-fx-background-color: #00512C; -fx-background-radius: 40 40 40 40;" />
          </children>
-      </VBox>
+      </HBox>
    </center>
 </BorderPane>

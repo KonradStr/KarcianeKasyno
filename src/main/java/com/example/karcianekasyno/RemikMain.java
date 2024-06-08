@@ -1,22 +1,31 @@
 package com.example.karcianekasyno;
 
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 
 public class RemikMain {
     @FXML // Player card slots
     ImageView pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10, pc11, pc12, pc13, pc14;
 
-    boolean pc1Chosen = false, pc2Chosen = false, pc3Chosen = false, pc4Chosen = false, pc5Chosen = false, pc6Chosen = false, pc7Chosen = false, pc8Chosen = false, pc9Chosen = false, pc10Chosen = false, pc11Chosen = false, pc12Chosen = false, pc13Chosen = false, pc14Chosen = false;
-
+    @FXML // srodkowy stół planszy gdzie dodawane są wyłożone karty
+    HBox middleBoard;
 
     @FXML // Opponent1 card slots
     ImageView o1c1, o1c2, o1c3, o1c4, o1c5, o1c6, o1c7, o1c8, o1c9, o1c10, o1c11, o1c12, o1c13, o1c14;
@@ -31,15 +40,18 @@ public class RemikMain {
     ImageView deckTop;
 
     @FXML
-    Button drawCardButton, takeFromTopButton, tryToLayOffButton, finishLayOffButton, addToLayOffButton, cancelLayOffButton, confirmDiscardButton;
+    Button drawCardButton, takeFromTopButton, tryToLayOffButton, confirmDiscardButton;
 
     @FXML
-    Label cardsLeft;
+    Label cardsLeft, infoDisplay;
 
-    boolean[] pcChosenArray = {pc1Chosen, pc2Chosen, pc3Chosen, pc4Chosen, pc5Chosen, pc6Chosen, pc7Chosen, pc8Chosen, pc9Chosen, pc10Chosen, pc11Chosen, pc12Chosen, pc13Chosen, pc14Chosen};
+    boolean[] pcChosenArray = new boolean[14];
 
     RemikPlayer player1;
     RemikDeck deck;
+
+    boolean playersTurn = false;
+    boolean drawTime = false;
 
     public void startGameTest() {
         deck = new RemikDeck();
@@ -62,7 +74,23 @@ public class RemikMain {
 
         cardsLeft.setText("Cards left in deck: " + deck.cardsLeftInDeck());
 
+        playersTurn = true;
+        drawTime = true;
+
         routine();
+
+        // test kiedy jest tura innego gracza
+//        Thread testTurn = new Thread(() -> {
+//            try {
+//                Thread.sleep(30000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            playersTurn = false;
+//            routine();
+//        });
+//
+//        testTurn.start();
     }
 
     private void displayCards(RemikPlayer player) {
@@ -101,7 +129,7 @@ public class RemikMain {
     }
 
     private void dealCards(RemikDeck deck, RemikPlayer player) {
-        for (int i = 0; i < 13; i++) { //potem 13
+        for (int i = 0; i < 13; i++) { // początkowo 13 kart dla każdego
             player.addCard(deck.dealOne());
         }
         player.sortCardsBySortValue();
@@ -120,6 +148,435 @@ public class RemikMain {
         }
 
         return imagePath;
+    }
+
+    private Image rotateImage(Image image, double angle) {
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+
+        WritableImage rotatedImage = new WritableImage(height, width);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                rotatedImage.getPixelWriter().setColor(y, width - 1 - x, image.getPixelReader().getColor(x, y));
+            }
+        }
+        return rotatedImage;
+    }
+
+    private void toggleCardSelection(int cardIndex, ImageView cardView) {
+        boolean isSelected = !pcChosenArray[cardIndex - 1];
+        pcChosenArray[cardIndex - 1] = isSelected;
+        handlePcClick(cardView, isSelected);
+    }
+
+    private void handlePcClick(ImageView pc, boolean chosen) {
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.3), pc);
+        transition.setToY(chosen ? -20 : 0);
+        transition.play();
+    }
+
+    private boolean onlyOneCardUp() {
+        int count = 0;
+        for (boolean b : pcChosenArray) {
+            if (b) {
+                count++;
+                if (count > 1) {
+                    return false;
+                }
+            }
+        }
+        return count == 1;
+    }
+
+    @FXML
+    private void drawCard(ActionEvent event) {
+        RemikCard drawnCard = deck.dealOne();
+        player1.addCard(drawnCard);
+        player1.sortCardsBySortValue();
+        displayCards(player1);
+        cardsLeft.setText("Cards left in deck: " + deck.cardsLeftInDeck());
+
+        drawTime = !drawTime;
+        routine();
+    }
+
+    @FXML
+    private void takeFromTop(ActionEvent event) {
+        if (!deck.getDiscardedCards().isEmpty()) {
+            player1.addCard(deck.discardedCards.removeLast());
+            player1.sortCardsBySortValue();
+            displayCards(player1);
+            cardsLeft.setText("Cards left in deck: " + deck.cardsLeftInDeck());
+            drawTime = !drawTime;
+            routine();
+        }
+    }
+
+    @FXML
+    public void tryToLayOff(ActionEvent event) {
+
+        ArrayList<RemikCard> chosenCards = new ArrayList<>();
+
+        // dodaj wszystkie wybrane karty do listy "chosenCards"
+        for (int i = 0; i < pcChosenArray.length; i++) {
+            if (pcChosenArray[i]) {
+                if (i < player1.getCardsOnHand().size()) {
+                    chosenCards.add(player1.getCardsOnHand().get(i));
+                }
+            }
+        }
+
+        // sprawdzenie waruków: czy co najmniej 3 karty i jeden z 2 rodzajow sekwensow
+        if (chosenCards.size() >= 3 && (isSameSuitWithIncrementingValues(chosenCards) || isDifferentSuitsWithSameValue(chosenCards))) {
+            // Jeśli pasuje, usuń wybrane karty
+            for (int i = chosenCards.size() - 1; i >= 0; i--) {
+                RemikCard card = chosenCards.get(i);
+                int cardIndex = player1.getCardsOnHand().indexOf(card);
+                if (cardIndex >= 0) {
+                    removeCardFromHand(cardIndex + 1, false);
+                }
+            }
+
+            // podział kart na rzędy
+            ArrayList<ArrayList<RemikCard>> rowsOfCards = splitCardsIntoRows(chosenCards);
+
+            // wyświetlanie karty na middleBoard
+            for (ArrayList<RemikCard> row : rowsOfCards) {
+                displayRowOfCards(row);
+            }
+
+            routine();
+        } else {
+            System.out.println("Nie");
+        }
+
+    }
+
+    private ArrayList<ArrayList<RemikCard>> splitCardsIntoRows(ArrayList<RemikCard> cards) {
+        ArrayList<ArrayList<RemikCard>> rows = new ArrayList<>();
+        ArrayList<RemikCard> currentRow = new ArrayList<>();
+
+        for (int i = 0; i < cards.size(); i++) {
+            currentRow.add(cards.get(i));
+            if (i == cards.size() - 1) {
+                rows.add(currentRow);
+            }
+        }
+
+        return rows;
+    }
+
+    private void displayRowOfCards(ArrayList<RemikCard> row) {
+        // Sortowanie kart w rzędzie po sortValue
+        row.sort(Comparator.comparingInt(RemikCard::getSortValue));
+
+        HBox cardRow = new HBox();
+        cardRow.setSpacing(-50); // odstęp między kartami
+
+        for (RemikCard card : row) {
+            String imagePath = getImagePath(card);
+            ImageView temp = new ImageView();
+            temp.setFitHeight(150);
+            temp.setFitWidth(103);
+            temp.setImage(new Image(getClass().getResourceAsStream(imagePath)));
+
+            // Przechowuj odniesienie do karty w ImageView
+            temp.setUserData(card);
+
+            // mechanika klikania na kartę na srodku
+            temp.setOnMouseClicked(event -> {
+                displayCardsInHBox(cardRow);
+                tryToAddCardToHBox(cardRow);
+            });
+
+            cardRow.getChildren().add(temp);
+        }
+
+        addRowToMiddleBoard(cardRow);
+    }
+
+    private void addRowToMiddleBoard(HBox cardRow) {
+        if (middleBoard.getChildren().isEmpty() || !(middleBoard.getChildren().get(middleBoard.getChildren().size() - 1) instanceof VBox)) {
+            VBox vBox = new VBox();
+            vBox.setSpacing(10); // odstęp miedzy vboxami
+            vBox.setAlignment(Pos.CENTER); // wysrodkowanie
+            middleBoard.setSpacing(10); // odstęp miedzy vboxami
+            middleBoard.getChildren().add(vBox);
+        }
+
+        VBox currentVBox = (VBox) middleBoard.getChildren().get(middleBoard.getChildren().size() - 1);
+
+        if (currentVBox.getChildren().size() == 4) {
+            VBox newVBox = new VBox();
+            newVBox.setSpacing(10);
+            newVBox.setAlignment(Pos.CENTER);
+            middleBoard.getChildren().add(newVBox);
+            currentVBox = newVBox;
+        }
+
+        currentVBox.getChildren().add(cardRow);
+    }
+
+    private void displayCardsInHBox(HBox cardRow) {
+        System.out.println("Karty w tym HBox:");
+        for (Node node : cardRow.getChildren()) {
+            if (node instanceof ImageView) {
+                ImageView imageView = (ImageView) node;
+                RemikCard card = getCardFromImageView(imageView);
+                if (card != null) {
+                    System.out.println(card);
+                }
+            }
+        }
+    }
+
+    private RemikCard getCardFromImageView(ImageView imageView) {
+        return (RemikCard) imageView.getUserData();
+    }
+
+    private void tryToAddCardToHBox(HBox cardRow) {
+        if (!drawTime) {
+            ArrayList<RemikCard> cardsInRow = new ArrayList<>();
+            for (Node node : cardRow.getChildren()) {
+                if (node instanceof ImageView) {
+                    RemikCard card = getCardFromImageView((ImageView) node);
+                    if (card != null) {
+                        cardsInRow.add(card);
+                    }
+                }
+            }
+
+            // czy jedna karta wybrana
+            int selectedCardIndex = -1;
+            for (int i = 0; i < pcChosenArray.length; i++) {
+                if (pcChosenArray[i] && i < player1.getCardsOnHand().size()) {
+                    selectedCardIndex = i;
+                    break;
+                }
+            }
+
+            if (selectedCardIndex != -1) {
+                RemikCard selectedCard = player1.getCardsOnHand().get(selectedCardIndex);
+
+                // sprawdzenie czy po dodaniu warnki bylyby dalej spelnione
+                cardsInRow.add(selectedCard);
+                if (isSameSuitWithIncrementingValues(cardsInRow) || isDifferentSuitsWithSameValue(cardsInRow)) {
+                    cardsInRow.remove(selectedCard); //
+
+                    // usuwa karte z reki
+                    removeCardFromHand(selectedCardIndex + 1, false);
+                    pcChosenArray[selectedCardIndex] = false;
+
+
+                    // odaj kartę do middleBoard
+                    String imagePath = getImagePath(selectedCard);
+                    ImageView temp = new ImageView();
+                    temp.setFitHeight(150);
+                    temp.setFitWidth(103);
+                    temp.setImage(new Image(getClass().getResourceAsStream(imagePath)));
+
+                    temp.setUserData(selectedCard);
+                    temp.setOnMouseClicked(event -> {
+                        displayCardsInHBox(cardRow);
+                        tryToAddCardToHBox(cardRow);
+                    });
+
+                    cardRow.getChildren().add(temp);
+
+                    // sortowanie kart w poszczegolnych hboxach
+                    sortCardsInHBox(cardRow);
+
+                    System.out.println("Dodano kartę: " + selectedCard);
+                } else {
+                    cardsInRow.remove(selectedCard);
+                    System.out.println("Nie można dodać karty: " + selectedCard);
+                }
+            }
+        }
+    }
+
+    private void sortCardsInHBox(HBox cardRow) {
+        ArrayList<ImageView> cardViews = new ArrayList<>();
+        for (Node node : cardRow.getChildren()) {
+            if (node instanceof ImageView) {
+                cardViews.add((ImageView) node);
+            }
+        }
+
+        // sortowanie kart po sortValue
+        cardViews.sort(Comparator.comparingInt((ImageView imageView) -> ((RemikCard) imageView.getUserData()).getSortValue()));
+
+        // usuwa karty z hbox
+        cardRow.getChildren().clear();
+
+        // i dodaje na miejsce usunietych posortowane
+        cardRow.getChildren().addAll(cardViews);
+    }
+
+    private boolean isSameSuitWithIncrementingValues(ArrayList<RemikCard> cards) {
+        cards.sort(Comparator.comparingInt(RemikCard::getSortValue)); // sortowanie kart według "sortValue"
+        String suit = cards.get(0).getSuit();
+        for (int i = 1; i < cards.size(); i++) {
+            if (!cards.get(i).getSuit().equals(suit) || cards.get(i).getSortValue() != cards.get(i - 1).getSortValue() + 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isDifferentSuitsWithSameValue(ArrayList<RemikCard> cards) {
+        int value = cards.get(0).getValue();
+        HashSet<String> suits = new HashSet<>();
+        for (RemikCard card : cards) {
+            if (card.getValue() != value || !suits.add(card.getSuit())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @FXML
+    private void confirmDiscard(ActionEvent event) {
+        if (onlyOneCardUp()) {
+            discardSelectedCard();
+            drawTime = !drawTime;
+            routine();
+        }
+    }
+
+    private void routine() {
+        // musi być Platform.runLater, bo będzie thread exception, jak zmienia sie coś w javafx thread
+        Platform.runLater(() -> {
+            if (deck.isDeckEmpty()) {
+                deck.refillDeckFromDiescardedCards();
+            }
+
+            for (int i = 0; i < pcChosenArray.length; i++) {
+                if (i >= player1.getCardsOnHand().size()) {
+                    pcChosenArray[i] = false;
+                }
+            }
+
+            String topCard;
+            ImageView topImage = deckTop;
+            if (!deck.getDiscardedCards().isEmpty()) {
+                topCard = getImagePath(deck.getDiscardedCards().getLast());
+            } else {
+                topCard = "/cards/back.png";
+            }
+            topImage.setImage(new Image(getClass().getResourceAsStream(topCard)));
+
+            //wyswietlanie nad przyciskami co sie dzieje
+            if (playersTurn) {
+                if (drawTime) {
+                    infoDisplay.setText("Dobierz kartę z talii lub stosu kart odrzuconych:");
+                } else {
+                    infoDisplay.setText("Odrzuć kartę lub wyłóż karty:");
+                }
+            } else {
+                infoDisplay.setText("Oczekiwanie na zagranie innych graczy...");
+            }
+
+            setImageViewsDisableState(player1.getCardsOnHand().size());
+            updateButtonsVisibility();
+        });
+    }
+
+    private void setImageViewsDisableState(int numberOfCards) { // ustawia ilosc aktywnych ImageView dla pc w zależności od liczby kart na ręce
+        ImageView[] playerImageViews = {pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10, pc11, pc12, pc13, pc14};
+
+        for (int i = 0; i < playerImageViews.length; i++) {
+            if (i < numberOfCards) {
+                playerImageViews[i].setDisable(false); // enable ImageView
+            } else {
+                playerImageViews[i].setDisable(true); // disable ImageView
+            }
+        }
+    }
+
+    private void updateButtonsVisibility() {
+        if (playersTurn) {
+            if (drawTime) {
+                drawCardButton.setDisable(false);
+                takeFromTopButton.setDisable(false);
+                confirmDiscardButton.setDisable(true);
+                tryToLayOffButton.setDisable(true);
+            } else {
+                drawCardButton.setDisable(true);
+                takeFromTopButton.setDisable(true);
+                confirmDiscardButton.setDisable(false);
+                tryToLayOffButton.setDisable(false);
+            }
+        } else {
+
+            drawCardButton.setDisable(true);
+            takeFromTopButton.setDisable(true);
+            confirmDiscardButton.setDisable(true);
+            tryToLayOffButton.setDisable(true);
+        }
+
+        //System.out.println(playersTurn);
+    }
+
+    private void discardSelectedCard() {
+        for (int i = 0; i < pcChosenArray.length; i++) {
+            if (pcChosenArray[i]) {
+                removeCardFromHand(i + 1, true);
+                break;
+            }
+        }
+
+    }
+
+    private void removeCardFromHand(int viewIndex, boolean toDiscardedCards) {
+        int cardIndex = viewIndex - 1;
+        if (cardIndex >= 0 && cardIndex < player1.getCardsOnHand().size()) {
+            ImageView cardView = getPlayerImageViewByIndex(viewIndex);
+            resetCardPosition(cardView, () -> {
+                if (toDiscardedCards) {
+                    deck.discardedCards.add(player1.getCardsOnHand().remove(cardIndex));
+                } else {
+                    player1.getCardsOnHand().remove(cardIndex);
+                }
+                cardView.setImage(null);
+                cardView.setTranslateY(0);
+
+                pcChosenArray[cardIndex] = false;
+                for (int i = cardIndex; i < player1.getCardsOnHand().size(); i++) {
+                    pcChosenArray[i] = pcChosenArray[i + 1];
+                }
+                pcChosenArray[player1.getCardsOnHand().size()] = false;
+
+                for (int i = cardIndex; i < player1.getCardsOnHand().size(); i++) {
+                    ImageView currentView = getPlayerImageViewByIndex(i + 1);
+                    ImageView nextView = getPlayerImageViewByIndex(i + 2);
+                    if (nextView.getImage() != null) {
+                        currentView.setImage(nextView.getImage());
+                        currentView.setTranslateY(0);
+                    } else {
+                        currentView.setImage(null);
+                    }
+                }
+
+                ImageView lastView = getPlayerImageViewByIndex(player1.getCardsOnHand().size() + 1);
+                lastView.setImage(null);
+                lastView.setTranslateY(0);
+
+                routine();
+            });
+        } else {
+            System.out.println("Index out of bounds: " + viewIndex);
+        }
+    }
+
+    private void resetCardPosition(ImageView cardView, Runnable onFinished) {
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.3), cardView);
+        transition.setToY(0);
+        transition.setOnFinished(event -> {
+            onFinished.run();
+            updateButtonsVisibility();
+        });
+        transition.play();
     }
 
     private ImageView getPlayerImageViewByIndex(int index) {
@@ -202,252 +659,33 @@ public class RemikMain {
         };
     }
 
-    private Image rotateImage(Image image, double angle) {
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
-
-        WritableImage rotatedImage = new WritableImage(height, width);
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                rotatedImage.getPixelWriter().setColor(y, width - 1 - x, image.getPixelReader().getColor(x, y));
-            }
-        }
-        return rotatedImage;
-    }
-
     @FXML
-    private void pc1Clicked(MouseEvent event) {
-        toggleCardSelection(1, pc1);
-    }
-
-    @FXML
-    private void pc2Clicked(MouseEvent event) {
-        toggleCardSelection(2, pc2);
-    }
-
-    @FXML
-    private void pc3Clicked(MouseEvent event) {
-        toggleCardSelection(3, pc3);
-    }
-
-    @FXML
-    private void pc4Clicked(MouseEvent event) {
-        toggleCardSelection(4, pc4);
-    }
-
-    @FXML
-    private void pc5Clicked(MouseEvent event) {
-        toggleCardSelection(5, pc5);
-    }
-
-    @FXML
-    private void pc6Clicked(MouseEvent event) {
-        toggleCardSelection(6, pc6);
-    }
-
-    @FXML
-    private void pc7Clicked(MouseEvent event) {
-        toggleCardSelection(7, pc7);
-    }
-
-    @FXML
-    private void pc8Clicked(MouseEvent event) {
-        toggleCardSelection(8, pc8);
-    }
-
-    @FXML
-    private void pc9Clicked(MouseEvent event) {
-        toggleCardSelection(9, pc9);
-    }
-
-    @FXML
-    private void pc10Clicked(MouseEvent event) {
-        toggleCardSelection(10, pc10);
-    }
-
-    @FXML
-    private void pc11Clicked(MouseEvent event) {
-        toggleCardSelection(11, pc11);
-    }
-
-    @FXML
-    private void pc12Clicked(MouseEvent event) {
-        toggleCardSelection(12, pc12);
-    }
-
-    @FXML
-    private void pc13Clicked(MouseEvent event) {
-        toggleCardSelection(13, pc13);
-    }
-
-    @FXML
-    private void pc14Clicked(MouseEvent event) {
-        toggleCardSelection(14, pc14);
-    }
-
-    private void toggleCardSelection(int cardIndex, ImageView cardView) {
-        boolean isSelected = !pcChosenArray[cardIndex - 1];
-        pcChosenArray[cardIndex - 1] = isSelected;
-        handlePcClick(cardView, isSelected);
-    }
-
-    private void handlePcClick(ImageView pc, boolean chosen) {
-        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.3), pc);
-        transition.setToY(chosen ? -20 : 0);
-        transition.play();
-    }
-
-    private boolean onlyOneCardUp() {
-        int count = 0;
-        for (boolean b : pcChosenArray) {
-            if (b) {
-                count++;
-                if (count > 1) {
-                    return false;
-                }
-            }
-        }
-        return count == 1;
-    }
-
-    @FXML
-    private void drawCard(ActionEvent event) {
-        RemikCard drawnCard = deck.dealOne();
-        player1.addCard(drawnCard);
-        player1.sortCardsBySortValue();
-        displayCards(player1);
-        cardsLeft.setText("Cards left in deck: " + deck.cardsLeftInDeck());
-        routine();
-    }
-
-    @FXML
-    private void takeFromTop(ActionEvent event) {
-        if(!deck.getDiscardedCards().isEmpty()){
-            player1.addCard(deck.discardedCards.removeLast());
-            player1.sortCardsBySortValue();
-            displayCards(player1);
-            cardsLeft.setText("Cards left in deck: " + deck.cardsLeftInDeck());
-            routine();
-        }
-    }
-
-    public void tryToLayOff(ActionEvent event) {
-
-    }
-
-    public void finishLayOff(ActionEvent event) {
-        for (int i = 0; i < pcChosenArray.length; i++) {
-            RemikCard card = player1.getCardsOnHand().size() > i ? player1.getCardsOnHand().get(i) : null;
-            if (pcChosenArray[i]) {
-                System.out.println("pc" + (i + 1) + ": " + (card != null ? card.getRank() + " of " + card.getSuit() : "No card") + ", Chosen: true");
-            } else {
-                if (card != null) {
-                    System.out.println("pc" + (i + 1) + ": " + card.getRank() + " of " + card.getSuit() + ", Chosen: false");
-                } else {
-                    System.out.println("pc" + (i + 1) + ": No card, Chosen: false");
-                }
-            }
-        }
-        System.out.println(player1.getCardsOnHand().size());
-    }
-
-    public void addToLayOff(ActionEvent event) {
-
-    }
-
-    public void cancelLayOff(ActionEvent event) {
-        System.out.println(deck.getDiscardedCards());
-    }
-
-    @FXML
-    private void confirmDiscard(ActionEvent event) {
-        discardSelectedCard();
-        routine();
-    }
-
-    private void routine(){
-        if (deck.isDeckEmpty()) {
-            deck.refillDeckFromDiescardedCards();
-        }
-
-        String topCard;
-        ImageView topImage = deckTop;
-        if(!deck.getDiscardedCards().isEmpty()){
-            topCard = getImagePath(deck.getDiscardedCards().getLast());
-        } else {
-            topCard = "/cards/back.png";
-        }
-        topImage.setImage(new Image(getClass().getResourceAsStream(topCard)));
-
-
-        updateButtonsVisibility();
-
-    }
-
-    private void updateButtonsVisibility() {
-        if (player1.getCardsOnHand().size() == 13) {
-            drawCardButton.setVisible(true);
-            takeFromTopButton.setVisible(true);
-            confirmDiscardButton.setVisible(false);
-        } else if (player1.getCardsOnHand().size() == 14) {
-            drawCardButton.setVisible(false);
-            takeFromTopButton.setVisible(false);
-            confirmDiscardButton.setVisible(true);
-        }
-    }
-
-    private void discardSelectedCard() {
-        if (onlyOneCardUp()) {
-            for (int i = 0; i < pcChosenArray.length; i++) {
-                if (pcChosenArray[i]) {
-                    removeCardFromHand(i + 1);
-                    break;
-                }
+    private synchronized void pcClicked(MouseEvent event) {
+        Object source = event.getSource();
+        if (source instanceof ImageView) {
+            ImageView clickedCard = (ImageView) source;
+            int cardIndex = getCardIndex(clickedCard);
+            if (cardIndex != -1) {
+                toggleCardSelection(cardIndex, clickedCard);
             }
         }
     }
 
-    private void removeCardFromHand(int viewIndex) {
-        int cardIndex = viewIndex - 1;
-        if (cardIndex >= 0 && cardIndex < player1.getCardsOnHand().size()) {
-            ImageView cardView = getPlayerImageViewByIndex(viewIndex);
-            resetCardPosition(cardView, () -> {
-                deck.discardedCards.add(player1.getCardsOnHand().remove(cardIndex));
-                cardView.setImage(null);
-                cardView.setTranslateY(0);
-
-                pcChosenArray[cardIndex] = false;
-
-                for (int i = cardIndex; i < player1.getCardsOnHand().size(); i++) {
-                    ImageView currentView = getPlayerImageViewByIndex(i + 1);
-                    ImageView nextView = getPlayerImageViewByIndex(i + 2);
-                    if (nextView.getImage() != null) {
-                        currentView.setImage(nextView.getImage());
-                        currentView.setTranslateY(0);
-                        pcChosenArray[i] = pcChosenArray[i + 1];
-                    } else {
-                        currentView.setImage(null);
-                    }
-                }
-
-                ImageView lastView = getPlayerImageViewByIndex(player1.getCardsOnHand().size() + 1);
-                lastView.setImage(null);
-                lastView.setTranslateY(0);
-
-                routine();
-            });
-        } else {
-            System.out.println("Index out of bounds: " + viewIndex);
-        }
-    }
-
-    private void resetCardPosition(ImageView cardView, Runnable onFinished) {
-        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.3), cardView);
-        transition.setToY(0);
-        transition.setOnFinished(event -> {
-            onFinished.run();
-            updateButtonsVisibility();
-        });
-        transition.play();
+    private int getCardIndex(ImageView cardView) {
+        if (cardView == pc1) return 1;
+        if (cardView == pc2) return 2;
+        if (cardView == pc3) return 3;
+        if (cardView == pc4) return 4;
+        if (cardView == pc5) return 5;
+        if (cardView == pc6) return 6;
+        if (cardView == pc7) return 7;
+        if (cardView == pc8) return 8;
+        if (cardView == pc9) return 9;
+        if (cardView == pc10) return 10;
+        if (cardView == pc11) return 11;
+        if (cardView == pc12) return 12;
+        if (cardView == pc13) return 13;
+        if (cardView == pc14) return 14;
+        return -1;
     }
 }
