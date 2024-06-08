@@ -2,6 +2,7 @@ package com.example.casino;
 
 import com.example.casino.Controllers.*;
 import com.example.casino.Packets.*;
+import com.example.casino.Server.Karta;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -166,11 +167,41 @@ public class Client extends Thread{
                 GamePacket gamePacket = (GamePacket) respone;
                 GamePacket.Status status = gamePacket.getStatus();
                 if (status.equals(GamePacket.Status.START)){
+                    Platform.runLater(() -> {
+                        startGame(gamePacket.getPlayers(), gamePacket.getPlayer().getPlayerData());
+                    });
+                }else if (status.equals(GamePacket.Status.FIRST_HAND_CARD)){
                     Platform.runLater(() ->
-                            startGame()
+                            setFirstCard(gamePacket.getCard())
                     );
-                }else{
-                    System.out.println(gamePacket.getDesc());
+                }
+                else if (status.equals(GamePacket.Status.SECOND_HAND_CARD)){
+                    Platform.runLater(() ->
+                            setSecondCard(gamePacket.getCard())
+                    );
+                }
+                else if (status.equals(GamePacket.Status.SMALL_BLIND)){
+                    if (gamePacket.getPlayer() != null){
+                        Platform.runLater(() ->
+                                otherSmallBlind(gamePacket.getPlayer())
+                        );
+                    }else {
+                        Platform.runLater(() ->
+                                smallBlind()
+                        );
+                    }
+                }
+
+                else if (status.equals(GamePacket.Status.BIG_BLIND)){
+                    if (gamePacket.getPlayer() != null){
+                        Platform.runLater(() ->
+                                otherBigBlind(gamePacket.getPlayer())
+                        );
+                    }else {
+                        Platform.runLater(() ->
+                                bigBlind()
+                        );
+                    }
                 }
                 break;
             }
@@ -287,11 +318,13 @@ public class Client extends Thread{
     }
 
 
-    private void startGame(){
+    private void startGame(List<Player> players, String username){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerTable.fxml"));
             Parent root = loader.load();
             this.ptc = loader.getController();
+            this.ptc.setYourData(username);
+            this.ptc.assignPlayers(players);
             Main.stage.close();
             Main.stage.setScene(new Scene(root));
             Main.stage.show();
@@ -299,6 +332,27 @@ public class Client extends Thread{
             e.printStackTrace();
             System.err.println("error in loading table");
         }
+    }
+
+    private void setFirstCard(Karta card){
+        this.ptc.setYourCard1(card);
+    }
+
+    private void setSecondCard(Karta card){
+        this.ptc.setYourCard2(card);
+    }
+
+    private void smallBlind(){
+        this.ptc.smallBlind();
+    }
+    private void otherSmallBlind(Player player){
+        this.ptc.otherSmallBlind(player);
+    }
+    private void bigBlind(){
+        this.ptc.bigBlind();
+    }
+    private void otherBigBlind(Player player){
+        this.ptc.otherBigBlind(player);
     }
 
 

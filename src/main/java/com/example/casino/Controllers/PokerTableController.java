@@ -2,15 +2,274 @@ package com.example.casino.Controllers;
 
 import com.example.casino.Main;
 import com.example.casino.Packets.GamePacket;
+import com.example.casino.Player;
+import com.example.casino.Server.Karta;
+import com.example.casino.Server.Rank;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
-public class PokerTableController {
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+public class PokerTableController implements Initializable {
+      @FXML
+    private Button CallButton;
+
     @FXML
-    private Button next;
+    private Button CheckButton;
+
+    @FXML
+    private Button FoldButton;
+
+    @FXML
+    private Button RaiseButton;
+
+    @FXML
+    private ImageView TableCard1;
+
+    @FXML
+    private ImageView TableCard2;
+
+    @FXML
+    private ImageView TableCard3;
+
+    @FXML
+    private ImageView TableCard4;
+
+    @FXML
+    private ImageView TableCard5;
+
+    @FXML
+    private ImageView yourCard1;
+    @FXML
+    private ImageView yourCard2;
+
+    @FXML
+    private ImageView player1Card1;
+
+    @FXML
+    private ImageView player1Card2;
+
+    @FXML
+    private ImageView player2Card1;
+
+    @FXML
+    private ImageView player2Card2;
+
+    @FXML
+    private ImageView player3Card1;
+
+    @FXML
+    private ImageView player3Card2;
+
+    @FXML
+    private ImageView player4Card1;
+
+    @FXML
+    private ImageView player4Card2;
+    @FXML
+    private Label pool;
+    @FXML
+    private Label player1Money;
+
+    @FXML
+    private Label player1Username;
+    @FXML
+    private Label player2Money;
+
+    @FXML
+    private Label player2Username;
+
+    @FXML
+    private Label player3Money;
+
+    @FXML
+    private Label player3Username;
+    @FXML
+    private Label player4Money;
+
+    @FXML
+    private Label player4Username;
+    @FXML
+    private Label yourMoney;
+
+    @FXML
+    private Label yourUsername;
+
+    private Map<Player, PlayerFields> playersFields;
+
+
 
     @FXML
     public void nextPlayer(){
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+    }
+
+    public void setYourData(String username){
+        this.yourUsername.setText(username);
+        this.yourMoney.setText("1000");
+    }
+
+    public void setYourCard1(Karta yourCard1) {
+        String rank = Rank.rank.get(yourCard1.rank.toString());
+        String color = yourCard1.kolor.toString();
+        this.yourCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/"+rank+color+".png")));
+    }
+
+    public void setYourCard2(Karta yourCard2) {
+        String rank = Rank.rank.get(yourCard2.rank.toString());
+        String color = yourCard2.kolor.toString();
+        this.yourCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/"+rank+color+".png")));
+    }
+
+    public void assignPlayers(List<Player> plyerList){
+        // TODO : popraw to prosze
+        System.out.println("Liczba pozostałych graczy: " + plyerList.size());
+        Player player1 = plyerList.get(0);
+        System.out.println("kaska gracza drugego " + player1.getMoney());
+        PlayerFields playerFields = new PlayerFields(player1Money, player1Username, player1Card1, player1Card2);
+        playerFields.setPlayer(player1, true);
+        playersFields.put(player1, playerFields);
+        if (plyerList.size() == 1) return;
+        Player player2 = plyerList.get(1);
+        playerFields = new PlayerFields(player2Money, player2Username, player2Card1, player2Card2);
+        playerFields.setPlayer(player2, true);
+        playersFields.put(player2, playerFields);
+        if (plyerList.size() == 2) return;
+        Player player3 = plyerList.get(2);
+        setThirdPlayer(player3, true);
+        if (plyerList.size() == 3) return;
+        Player player4 = plyerList.get(3);
+        setFourthPlayer(player4, true);
+    }
+
+    private void setFirstPlayer(Player player, boolean back) {
+        if (back) {
+            this.player1Username.setText(player.getPlayerData());
+            this.player1Money.setText(String.valueOf(player.getMoney()));
+            this.player1Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+            this.player1Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+        } else {
+            String rank = Rank.rank.get(player.getCard1().rank.toString());
+            String color = player.getCard1().kolor.toString();
+            this.player1Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+            rank = Rank.rank.get(player.getCard2().rank.toString());
+            color = player.getCard2().kolor.toString();
+            this.player1Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+        }
+    }
+
+    private void setSecondPlayer(Player player, boolean back) {
+        if (back) {
+            this.player2Username.setText(player.getPlayerData());
+            this.player2Money.setText(String.valueOf(player.getMoney()));
+            this.player2Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+            this.player2Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+        } else {
+            String rank = Rank.rank.get(player.getCard1().rank.toString());
+            String color = player.getCard1().kolor.toString();
+            this.player2Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+            rank = Rank.rank.get(player.getCard2().rank.toString());
+            color = player.getCard2().kolor.toString();
+            this.player2Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+        }
+    }
+
+    private void setThirdPlayer(Player player, boolean back) {
+        if (back) {
+            this.player3Username.setText(player.getPlayerData());
+            this.player3Money.setText(String.valueOf(player.getMoney()));
+            this.player3Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+            this.player3Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+        } else {
+            String rank = Rank.rank.get(player.getCard1().rank.toString());
+            String color = player.getCard1().kolor.toString();
+            this.player3Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+            rank = Rank.rank.get(player.getCard2().rank.toString());
+            color = player.getCard2().kolor.toString();
+            this.player3Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+        }
+    }
+
+    private void setFourthPlayer(Player player, boolean back) {
+        if (back) {
+            this.player4Username.setText(player.getPlayerData());
+            this.player4Money.setText(String.valueOf(player.getMoney()));
+            this.player4Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+            this.player4Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
+        } else {
+            String rank = Rank.rank.get(player.getCard1().rank.toString());
+            String color = player.getCard1().kolor.toString();
+            this.player4Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+            rank = Rank.rank.get(player.getCard2().rank.toString());
+            color = player.getCard2().kolor.toString();
+            this.player4Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+        }
+    }
+
+    public void smallBlind(){
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
+        yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 5));
+    }
+    public void otherSmallBlind(Player player){
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
+        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 5));
+    }
+    public void otherBigBlind(Player player){
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
+        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 10));
+    }
+
+    public void bigBlind(){
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
+        yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 10));
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        disableButtonFold();
+        disableButtonCheck();
+        disableButtonRaise();
+        disableButtonCall();
+        this.pool.setText("0");
+        this.playersFields = new HashMap<>();
+    }
+
+    private void disableButtonCall(){
+        this.CallButton.setDisable(true);
+    }
+
+    private void disableButtonCheck(){
+        this.CheckButton.setDisable(true);
+    }
+    private void disableButtonRaise(){
+        this.RaiseButton.setDisable(true);
+    }
+
+    private void disableButtonFold(){
+        this.FoldButton.setDisable(true);
+    }
+    private void enableButtonCall(){
+        this.CallButton.setDisable(false);
+    }
+
+    private void enableButtonCheck(){
+        this.CheckButton.setDisable(false);
+    }
+    private void enableButtonRaise(){
+        this.RaiseButton.setDisable(false);
+    }
+
+    private void enableButtonFold(){
+        this.FoldButton.setDisable(false);
     }
 }
