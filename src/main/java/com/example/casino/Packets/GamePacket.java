@@ -13,6 +13,9 @@ public class GamePacket extends Packet{
 
     public enum Status{
         START,
+        HAND_CARDS,
+        TABLE_CARDS,
+        MOVE
     }
     private Status status;
 

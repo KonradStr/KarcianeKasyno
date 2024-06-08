@@ -7,6 +7,9 @@ import com.example.casino.Player;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PokerGame implements Callable<Player> {
     String id;
@@ -15,6 +18,9 @@ public class PokerGame implements Callable<Player> {
 
     List<ClientHandler> players;
     List<Player> playersData;
+    final Lock lock = new ReentrantLock();
+    final Condition next = lock.newCondition();
+
 
     public PokerGame(String id) {
         playersReady = 0;
@@ -43,6 +49,23 @@ public class PokerGame implements Callable<Player> {
     public Player call() throws Exception {
         Thread.sleep(1000);
         broadcast(new GamePacket("Game Starting", GamePacket.Status.START));
+        broadcast(new GamePacket("Karty na rece", GamePacket.Status.HAND_CARDS));
+        broadcast(new GamePacket("środkowe karty:", GamePacket.Status.TABLE_CARDS));
+
+        for (ClientHandler ch : players) {
+            System.out.println(ch.getPlayer().getPlayerData());
+            synchronized (next) {
+                ch.sendPacket(new GamePacket("twój ruch", GamePacket.Status.MOVE));
+                next.await();
+            }
+        }
+
         return playersData.get(0);
+    }
+
+    public void nextPlayer(){
+        synchronized (next) {
+            next.signal();
+        }
     }
 }

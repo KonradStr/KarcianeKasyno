@@ -19,6 +19,8 @@ public class ClientHandler extends Thread {
     private ObjectOutputStream out;
     private ObjectInputStream in;
 
+    private String UUID;
+
     public ClientHandler(Socket socket) {
         this.clientSocket = socket;
         try {
@@ -133,6 +135,7 @@ public class ClientHandler extends Thread {
                 String data = createGamePacket.getDesc();
                 CreateGamePacket.GameType gameType = createGamePacket.getGameType();
                 String UUID = createGamePacket.getUUID();
+                this.UUID = createGamePacket.getUUID();
                 if (gameType.equals(CreateGamePacket.GameType.POKER)) {
                     GameServer.pokerGames.put(UUID, new PokerGame(UUID, this));
                     System.out.println("Stworzono nową gre pokera: " + UUID);
@@ -147,6 +150,7 @@ public class ClientHandler extends Thread {
                 JoinGamePacket joinRequest = (JoinGamePacket)request;
                 System.out.println("Dołączanie do gry");
                 System.out.println(joinRequest.getUUID());
+                this.UUID = joinRequest.getUUID();
                 JoinGamePacket.GameType gameType = joinRequest.getGameType();
                 JoinGamePacket.Status status = joinRequest.getStatus();
                 System.out.println(gameType);
@@ -232,6 +236,14 @@ public class ClientHandler extends Thread {
                     }
                 }
                 break;
+            } case GAME: {
+                GamePacket gamePacket = (GamePacket) request;
+                GamePacket.Status gamePacketStatus = gamePacket.getStatus();
+                if (gamePacketStatus.equals(GamePacket.Status.MOVE)){
+                    System.out.println("kliknieto");
+                    GameServer.pokerGames.get(this.UUID).nextPlayer();
+                }
+
             }default:{
                 System.err.println("NIEZNANY PAKIET");
             }

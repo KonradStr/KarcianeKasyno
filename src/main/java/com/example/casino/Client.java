@@ -169,11 +169,12 @@ public class Client extends Thread{
                     Platform.runLater(() ->
                             startGame()
                     );
+                }else{
+                    System.out.println(gamePacket.getDesc());
                 }
+                break;
             }
-            {
-
-            }default:{
+            default:{
                 System.err.println("NIEZNANY PAKIET");
             }
         }
