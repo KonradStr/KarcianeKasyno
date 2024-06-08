@@ -240,13 +240,16 @@ public class ClientHandler extends Thread {
             } case GAME: {
                 GamePacket gamePacket = (GamePacket) request;
                 GamePacket.Status gamePacketStatus = gamePacket.getStatus();
+                System.out.println("odebrano pakiet game");
                 if (gamePacketStatus.equals(GamePacket.Status.MOVE)){
-                    System.out.println("kliknieto");
+                    System.out.println("odebrano pakiet move");
                     this.monitorObj = GameServer.pokerGames.get(this.UUID).getMonitorObj();
-                    synchronized (monitorObj){
+                    System.out.println("1.");
+                    synchronized(monitorObj) {
+                        GameServer.pokerGames.get(this.UUID).nextPlayer = true;
                         this.monitorObj.notify();
                     }
-                    System.out.println("to dziala dalej");
+                    System.out.println("2.");
                 }
                 break;
 
@@ -256,6 +259,7 @@ public class ClientHandler extends Thread {
         }
 
     }
+
 
     public void sendPacket(Packet packet){
         try {

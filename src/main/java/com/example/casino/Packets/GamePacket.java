@@ -18,9 +18,15 @@ public class GamePacket extends Packet{
         SMALL_BLIND,
         BIG_BLIND
     }
+    public enum MOVE_TYPE{
+        CALL,
+        CHECK
+    }
+    private MOVE_TYPE move_type;
     private Status status;
     private Player player;
     private int moneyPool;
+    private Integer cardindex;
 
     private Karta card;
     private List<Player> players;
@@ -40,10 +46,22 @@ public class GamePacket extends Packet{
         this.player = player;
     }
 
+    public GamePacket(String data, Status status, MOVE_TYPE move_type) {
+        super(PacketType.GAME, data);
+        this.status = status;
+        this.move_type = move_type;
+    }
     public GamePacket(String data, Status status, Player player) {
         super(PacketType.GAME, data);
         this.status = status;
         this.player = player;
+    }
+
+    public GamePacket(String data, Status status, Integer cardIndex, Karta card) {
+        super(PacketType.GAME, data);
+        this.status = status;
+        this.card = card;
+        this.cardindex = cardIndex;
     }
 
     public GamePacket(String data, Status status, Karta card) {
@@ -72,5 +90,13 @@ public class GamePacket extends Packet{
 
     public Player getPlayer() {
         return player;
+    }
+
+    public Integer getCardindex() {
+        return cardindex;
+    }
+
+    public MOVE_TYPE getMove_type() {
+        return move_type;
     }
 }

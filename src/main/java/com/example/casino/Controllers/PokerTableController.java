@@ -112,6 +112,10 @@ public class PokerTableController implements Initializable {
     @FXML
     public void nextPlayer(){
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+        disableButtonCall();
+        disableButtonFold();
+        disableButtonRaise();
+        disableButtonCheck();
     }
 
     public void setYourData(String username){
@@ -234,12 +238,50 @@ public class PokerTableController implements Initializable {
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 10));
     }
 
+    public void setTableCard(Integer cardIndex, Karta card){
+        String rank = Rank.rank.get(card.rank.toString());
+        String color = card.kolor.toString();
+        switch (cardIndex){
+            case 1 :{
+                TableCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+                break;
+            }
+            case 2 :{
+                TableCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+                break;
+            }
+            case 3 :{
+                TableCard3.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+                break;
+            }
+            case 4 :{
+                TableCard4.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+                break;
+            }
+            case 5 :{
+                TableCard5.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
+                break;
+            }
+        }
+
+    }
+
+    public void makeMove(){
+        enableButtonFold();
+        enableButtonRaise();
+        enableButtonCall();
+    }
+    public void otherMakeMove(){
+        System.out.println("ktos robi ruchy");
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         disableButtonFold();
         disableButtonCheck();
         disableButtonRaise();
         disableButtonCall();
+        hideButtonCheck();
         this.pool.setText("0");
         this.playersFields = new HashMap<>();
     }
@@ -271,5 +313,20 @@ public class PokerTableController implements Initializable {
 
     private void enableButtonFold(){
         this.FoldButton.setDisable(false);
+    }
+
+    private void hideButtonCheck(){
+        this.CheckButton.setVisible(false);
+    }
+
+    private void showButtonCheck(){
+        this.CheckButton.setVisible(true);
+    }
+    private void hideButtonCall(){
+        this.CallButton.setVisible(false);
+    }
+
+    private void showButtonCall(){
+        this.CallButton.setVisible(true);
     }
 }

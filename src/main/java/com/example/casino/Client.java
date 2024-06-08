@@ -188,6 +188,7 @@ public class Client extends Thread{
                     }else {
                         Platform.runLater(() ->
                                 smallBlind()
+
                         );
                     }
                 }
@@ -200,6 +201,20 @@ public class Client extends Thread{
                     }else {
                         Platform.runLater(() ->
                                 bigBlind()
+                        );
+                    }
+                } else if (status.equals(GamePacket.Status.TABLE_CARDS)) {
+                    Platform.runLater(() ->
+                            setTableCard(gamePacket.getCardindex(), gamePacket.getCard())
+                    );
+                }else if (status.equals(GamePacket.Status.MOVE)){
+                    if (gamePacket.getPlayer() != null){
+                        Platform.runLater(() ->
+                                otherMakeMove(gamePacket.getPlayer())
+                        );
+                    }else{
+                        Platform.runLater(() ->
+                                makeMove()
                         );
                     }
                 }
@@ -355,6 +370,16 @@ public class Client extends Thread{
         this.ptc.otherBigBlind(player);
     }
 
+    private void setTableCard(Integer cardIndex, Karta card){
+        this.ptc.setTableCard(cardIndex, card);
+    }
+
+    private void makeMove(){
+        this.ptc.makeMove();
+    }
+    private void otherMakeMove(Player player){
+        this.ptc.otherMakeMove();
+    }
 
 
     private void showLoginErr(String error){

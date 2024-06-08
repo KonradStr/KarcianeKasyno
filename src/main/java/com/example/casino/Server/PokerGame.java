@@ -21,6 +21,7 @@ public class PokerGame implements Callable<Player> {
     List<Player> playersData;
     final Lock lock = new ReentrantLock();
     final Condition next = lock.newCondition();
+    boolean nextPlayer = false;
     Object monitorObj = new Object();
 
     Talia talia;
@@ -114,9 +115,30 @@ public class PokerGame implements Callable<Player> {
                 monitorObj.wait();
             }
         }
+        for (int i = 1; i <= 3; i++) {
+            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i, talia.KartaZTalii()));
+            Thread.sleep(1500);
+        }
+        for (int i = 0; i < 3; i++){
+            for (ClientHandler ch : players){
+                System.out.println(ch.getPlayer().getPlayerData());
+                synchronized (monitorObj) {
+                    ch.sendPacket(new GamePacket("your move", GamePacket.Status.MOVE));
+                    for (ClientHandler otherCh : players) {
+                        if (!otherCh.equals(ch)) {
+                            otherCh.sendPacket(new GamePacket("other player move", GamePacket.Status.MOVE, ch.getPlayer()));
+                        }
+                    }
+                    while(!nextPlayer) {
+                        monitorObj.wait();
+                    }
+                }
+                System.out.println("dalsze działanie");
+            }
+            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i, talia.KartaZTalii()));
+            Thread.sleep(1500);
+        }
         /*
-        broadcast(new GamePacket("środkowe karty:", GamePacket.Status.TABLE_CARDS));
-
         for (ClientHandler ch : players) {
             System.out.println(ch.getPlayer().getPlayerData());
             synchronized (monitorObj) {
@@ -137,4 +159,6 @@ public class PokerGame implements Callable<Player> {
     public Object getMonitorObj() {
         return monitorObj;
     }
+
+
 }
