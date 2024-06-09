@@ -47,16 +47,16 @@ public class RegisterController implements Initializable {
         String date = String.valueOf(birthDatePicker.getValue());
         String password = passwordField.getText();
         System.out.println(email + login + date + password);
-        if (login.isEmpty() || password.isEmpty() || email.isEmpty() || date.isEmpty()){
+        if (login.isEmpty() || password.isEmpty() || email.isEmpty() || date.isEmpty()) {
             enableErr("NIE PODANO WSZYSTKICH DANYCH");
-        }else{
+        } else {
             Packet p = new RegisterPacket("REGISTER TRY", email, login, password, date, RegisterPacket.Status.REGISTER);
             Main.client.sendPacket(p);
         }
     }
 
     @FXML
-    private void goToLogin(){
+    private void goToLogin() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/casino/login.fxml"));
             Parent root = loader.load();
@@ -75,7 +75,7 @@ public class RegisterController implements Initializable {
         register();
     }
 
-    public void enableErr(String errMessage){
+    public void enableErr(String errMessage) {
         Err.setText(errMessage);
         Err.setVisible(true);
     }
@@ -88,7 +88,7 @@ public class RegisterController implements Initializable {
 
 
     @FXML
-    public void closeWindow(){
+    public void closeWindow() {
         Stage stage = (Stage) exit.getScene().getWindow();
         //stage.setIconified(true);
         Main.client.interrupt();
@@ -99,7 +99,7 @@ public class RegisterController implements Initializable {
 
 
     @FXML
-    public void minimizeWindow(){
+    public void minimizeWindow() {
         Stage stage = (Stage) minimize.getScene().getWindow();
         stage.setIconified(true);
     }

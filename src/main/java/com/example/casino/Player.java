@@ -14,14 +14,14 @@ import java.util.List;
 public class Player implements Serializable {
     private String username;
     private Integer id;
-
     private boolean isReady;
     private Karta card1;
     private Karta card2;
     public PokerHand pokerHand;
     public boolean passedAway;
+    public Integer money;
+    public Integer curBid;
 
-    private Integer money;
 
     public Player(Integer id, String username, boolean isReady) {
         this.id = id;
@@ -31,11 +31,17 @@ public class Player implements Serializable {
         this.pokerHand = new PokerHand();
     }
 
-    public String getPlayerData(){
+    public void clearHand() {
+        this.card1 = null;
+        this.card2 = null;
+        this.pokerHand.clearHand();
+    }
+
+    public String getPlayerData() {
         return username;
     }
 
-    public Integer getPlayerID(){
+    public Integer getPlayerID() {
         return id;
     }
 
@@ -71,5 +77,8 @@ public class Player implements Serializable {
     public int getMoney() {
         return money;
     }
-    public void pass() {this.passedAway = true;}
+
+    public void pass() {
+        this.passedAway = true;
+    }
 }

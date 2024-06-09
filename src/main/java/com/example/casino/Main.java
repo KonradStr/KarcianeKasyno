@@ -17,7 +17,8 @@ public class Main extends Application {
     public static Client client;
     private double xOffset = 0;
     private double yOffset = 0;
-    public void start(Stage primaryStage) throws Exception{
+
+    public void start(Stage primaryStage) throws Exception {
 
         client = new Client();
         this.stage = primaryStage;

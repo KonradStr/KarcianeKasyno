@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Client extends Thread{
+public class Client extends Thread {
 
     private Socket clientSocket;
     public ObjectOutputStream out;
@@ -30,11 +30,11 @@ public class Client extends Thread{
     private PokerTableController ptc;
 
 
-    public void run(){
+    public void run() {
         try {
             sendPacket(new Packet(PacketType.ACK, "hello"));
             Packet respone;
-            while(clientSocket.isConnected()){
+            while (clientSocket.isConnected()) {
                 try {
                     respone = (Packet) in.readObject();
                 } catch (ClassNotFoundException e) {
@@ -50,8 +50,8 @@ public class Client extends Thread{
         }
     }
 
-    private void parseRespone(Packet respone){
-        switch(respone.getType()) {
+    private void parseRespone(Packet respone) {
+        switch (respone.getType()) {
             case ACK:
                 System.out.println("Ustanowiono połączenie z serwerem");
                 break;
@@ -113,7 +113,7 @@ public class Client extends Thread{
                     System.out.println("utworzono gre");
                     System.out.println(createGamePacket.getGameType());
                     Platform.runLater(() ->
-                            openLobby(String.valueOf(createGamePacket.getGameType()),createGamePacket.getUUID(), new ArrayList<>(List.of(Main.player)))
+                            openLobby(String.valueOf(createGamePacket.getGameType()), createGamePacket.getUUID(), new ArrayList<>(List.of(Main.player)))
                     );
                 }
                 break;
@@ -143,7 +143,7 @@ public class Client extends Thread{
                 } else if (status.equals(JoinGamePacket.Status.USER_LEFT)) {
                     System.out.println("użytkownik opuścił lobby");
                     Platform.runLater(() ->
-                            refreshLobby(String.valueOf(gameType),false, joinGamePacket.getPlayer())
+                            refreshLobby(String.valueOf(gameType), false, joinGamePacket.getPlayer())
                     );
                 }
                 break;
@@ -163,42 +163,38 @@ public class Client extends Thread{
                 }
                 break;
             }
-            case GAME:{
+            case GAME: {
                 GamePacket gamePacket = (GamePacket) respone;
                 GamePacket.Status status = gamePacket.getStatus();
-                if (status.equals(GamePacket.Status.START)){
+                if (status.equals(GamePacket.Status.START)) {
                     Platform.runLater(() -> {
                         startGame(gamePacket.getPlayers(), gamePacket.getPlayer().getPlayerData());
                     });
-                }else if (status.equals(GamePacket.Status.FIRST_HAND_CARD)){
+                } else if (status.equals(GamePacket.Status.FIRST_HAND_CARD)) {
                     Platform.runLater(() ->
                             setFirstCard(gamePacket.getCard())
                     );
-                }
-                else if (status.equals(GamePacket.Status.SECOND_HAND_CARD)){
+                } else if (status.equals(GamePacket.Status.SECOND_HAND_CARD)) {
                     Platform.runLater(() ->
                             setSecondCard(gamePacket.getCard())
                     );
-                }
-                else if (status.equals(GamePacket.Status.SMALL_BLIND)){
-                    if (gamePacket.getPlayer() != null){
+                } else if (status.equals(GamePacket.Status.SMALL_BLIND)) {
+                    if (gamePacket.getPlayer() != null) {
                         Platform.runLater(() ->
                                 otherSmallBlind(gamePacket.getPlayer())
                         );
-                    }else {
+                    } else {
                         Platform.runLater(() ->
                                 smallBlind()
 
                         );
                     }
-                }
-
-                else if (status.equals(GamePacket.Status.BIG_BLIND)){
-                    if (gamePacket.getPlayer() != null){
+                } else if (status.equals(GamePacket.Status.BIG_BLIND)) {
+                    if (gamePacket.getPlayer() != null) {
                         Platform.runLater(() ->
                                 otherBigBlind(gamePacket.getPlayer())
                         );
-                    }else {
+                    } else {
                         Platform.runLater(() ->
                                 bigBlind()
                         );
@@ -207,12 +203,12 @@ public class Client extends Thread{
                     Platform.runLater(() ->
                             setTableCard(gamePacket.getCardindex(), gamePacket.getCard())
                     );
-                }else if (status.equals(GamePacket.Status.MOVE)){
-                    if (gamePacket.getPlayer() != null){
+                } else if (status.equals(GamePacket.Status.MOVE)) {
+                    if (gamePacket.getPlayer() != null) {
                         Platform.runLater(() ->
                                 otherMakeMove(gamePacket.getPlayer())
                         );
-                    }else{
+                    } else {
                         Platform.runLater(() ->
                                 makeMove(gamePacket.getMove_type(), gamePacket.getCurrentBid())
                         );
@@ -220,15 +216,28 @@ public class Client extends Thread{
                 }
                 break;
             }
-            default:{
+            case REMIK: {
+                RemikPacket remikPacket = (RemikPacket) respone;
+                RemikPacket.Status status = remikPacket.getStatus();
+                System.out.println("bez start");
+                if (status.equals(RemikPacket.Status.START)) {
+                    System.out.println("start");
+                    Platform.runLater(() -> {
+                        startGameRemik(remikPacket.getPlayers(), remikPacket.getPlayer().getPlayerData());
+                    });
+
+
+                }
+                break;
+            }
+            default: {
                 System.err.println("NIEZNANY PAKIET");
             }
         }
     }
 
 
-
-    private void logOut(){
+    private void logOut() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("login.fxml"));
             Parent root = loader.load();
@@ -237,13 +246,14 @@ public class Client extends Thread{
             Main.stage.setTitle("Login");
             Main.stage.setScene(new Scene(root));
             Main.stage.show();
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("error in loading table");
         }
 
     }
-    private void openMenu(){
+
+    private void openMenu() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Menu.fxml"));
             Parent root = loader.load();
@@ -252,7 +262,7 @@ public class Client extends Thread{
             Main.stage.setTitle("Menu");
             Main.stage.setScene(new Scene(root));
             Main.stage.show();
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("error in loading table");
         }
@@ -260,9 +270,9 @@ public class Client extends Thread{
     }
 
 
-    private void openLobby(String gameType, String uuid, List<Player> players){
+    private void openLobby(String gameType, String uuid, List<Player> players) {
         try {
-            if (gameType.equals("POKER")){
+            if (gameType.equals("POKER")) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerLobby.fxml"));
                 Parent root = loader.load();
                 this.plbc = loader.getController();
@@ -275,7 +285,7 @@ public class Client extends Thread{
                     plbc.addPlayer(p);
                 }
                 plbc.refreshPlayerContainer();
-            }else{
+            } else {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("RummyLobby.fxml"));
                 Parent root = loader.load();
                 this.rlbc = loader.getController();
@@ -289,13 +299,13 @@ public class Client extends Thread{
                 }
                 rlbc.refreshPlayerContainer();
             }
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("error in loading table");
         }
     }
 
-    private void refreshLobby(String gameType, boolean join, Player player){
+    private void refreshLobby(String gameType, boolean join, Player player) {
         if (gameType.equals("POKER")) {
             if (join) {
                 plbc.addPlayer(player);
@@ -304,7 +314,7 @@ public class Client extends Thread{
                 plbc.removePlayer(player);
                 plbc.refreshPlayerContainer();
             }
-        }else{
+        } else {
             if (join) {
                 rlbc.addPlayer(player);
                 rlbc.refreshPlayerContainer();
@@ -315,25 +325,38 @@ public class Client extends Thread{
         }
     }
 
-    private void leaveLobby(){
+    private void leaveLobby() {
         plbc = null;
         rlbc = null;
         openMenu();
     }
 
-    private void changeStatus(String gameType, boolean isReady, Player player){
+    private void changeStatus(String gameType, boolean isReady, Player player) {
         System.out.println(gameType);
         if (gameType.equals("POKER")) {
             plbc.changeStatus(isReady, player);
             plbc.refreshPlayerContainer();
-        }else{
+        } else {
             rlbc.changeStatus(isReady, player);
             rlbc.refreshPlayerContainer();
         }
     }
 
+    private void startGameRemik(List<Player> players, String username) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("remikMain.fxml"));
+            Parent root = loader.load();
+            Main.stage.close();
+            Main.stage.setScene(new Scene(root));
+            Main.stage.setFullScreen(true);
+            Main.stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("error in loading table");
+        }
+    }
 
-    private void startGame(List<Player> players, String username){
+    private void startGame(List<Player> players, String username) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerTable.fxml"));
             Parent root = loader.load();
@@ -342,55 +365,60 @@ public class Client extends Thread{
             this.ptc.assignPlayers(players);
             Main.stage.close();
             Main.stage.setScene(new Scene(root));
+            Main.stage.setFullScreen(true);
             Main.stage.show();
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("error in loading table");
         }
     }
 
-    private void setFirstCard(Karta card){
+    private void setFirstCard(Karta card) {
         this.ptc.setYourCard1(card);
     }
 
-    private void setSecondCard(Karta card){
+    private void setSecondCard(Karta card) {
         this.ptc.setYourCard2(card);
     }
 
-    private void smallBlind(){
+    private void smallBlind() {
         this.ptc.smallBlind();
     }
-    private void otherSmallBlind(Player player){
+
+    private void otherSmallBlind(Player player) {
         this.ptc.otherSmallBlind(player);
     }
-    private void bigBlind(){
+
+    private void bigBlind() {
         this.ptc.bigBlind();
     }
-    private void otherBigBlind(Player player){
+
+    private void otherBigBlind(Player player) {
         this.ptc.otherBigBlind(player);
     }
 
-    private void setTableCard(Integer cardIndex, Karta card){
+    private void setTableCard(Integer cardIndex, Karta card) {
         this.ptc.setTableCard(cardIndex, card);
     }
 
-    private void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid){
+    private void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid) {
         this.ptc.makeMove(moveType, currentBid);
     }
-    private void otherMakeMove(Player player){
+
+    private void otherMakeMove(Player player) {
         this.ptc.otherMakeMove();
     }
 
 
-    private void showLoginErr(String error){
+    private void showLoginErr(String error) {
         lc.enableErr(error);
     }
 
-    private void showRegisterErr(String error){
-         rc.enableErr(error);
+    private void showRegisterErr(String error) {
+        rc.enableErr(error);
     }
 
-    public void sendPacket(Packet packet){
+    public void sendPacket(Packet packet) {
         try {
             out.writeObject(packet);
             out.flush();
@@ -416,11 +444,11 @@ public class Client extends Thread{
         }
     }
 
-    public void setLoginController(LoginController lc){
+    public void setLoginController(LoginController lc) {
         this.lc = lc;
     }
 
-    public void setRegisterController(RegisterController rc){
+    public void setRegisterController(RegisterController rc) {
         this.rc = rc;
     }
 }

@@ -4,19 +4,20 @@ import com.example.casino.Player;
 
 import java.util.List;
 
-public class JoinGamePacket extends Packet{
+public class JoinGamePacket extends Packet {
     private String UUID;
     private Player player;
     private List<Player> players;
 
-    public enum GameType{
+    public enum GameType {
         POKER,
         RUMMY
     }
+
     private GameType gameType;
 
 
-    public enum Status{
+    public enum Status {
         JOIN,
         LEAVE,
         USER_JOIN,
@@ -26,6 +27,7 @@ public class JoinGamePacket extends Packet{
     }
 
     private Status status;
+
     public JoinGamePacket(String data, String UUID, Status status) {
         super(PacketType.JOINGAME, data);
         this.UUID = UUID;
@@ -44,14 +46,14 @@ public class JoinGamePacket extends Packet{
     public JoinGamePacket(String data, String UUID, List<Player> players, Status status) {
         super(PacketType.JOINGAME, data);
         this.UUID = UUID;
-        this.players= players;
+        this.players = players;
         this.status = status;
     }
 
     public JoinGamePacket(String data, String UUID, GameType gameType, List<Player> players, Status status) {
         super(PacketType.JOINGAME, data);
         this.UUID = UUID;
-        this.players= players;
+        this.players = players;
         this.status = status;
         this.gameType = gameType;
     }
@@ -62,7 +64,6 @@ public class JoinGamePacket extends Packet{
         this.status = status;
         this.gameType = gameType;
     }
-
 
 
     public String getUUID() {

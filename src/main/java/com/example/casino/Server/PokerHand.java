@@ -5,14 +5,14 @@ import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
 
- public class PokerHand implements Serializable {
+public class PokerHand implements Serializable {
     private List<Card> cards;
     private Map<Integer, List<Card>> cardsMap;
 
-    public void addHand(List<Karta> kartas){
-        for (Karta k:
-             kartas) {
-            this.cards.add(new Card(k.rank.ordinal()+2, k.kolor.ordinal()));
+    public void addHand(List<Karta> kartas) {
+        for (Karta k :
+                kartas) {
+            this.cards.add(new Card(k.rank.ordinal() + 2, k.kolor.ordinal()));
         }
         if (cards.size() == 7) {
             cardsMap = Helpers.getValueMap(cards);
@@ -20,7 +20,8 @@ import static java.util.stream.Collectors.groupingBy;
 
         }
     }
-    public void clearHand(){
+
+    public void clearHand() {
         this.cards.clear();
     }
 
@@ -34,7 +35,7 @@ import static java.util.stream.Collectors.groupingBy;
         cardsMap = Helpers.getValueMap(cards);
     }
 
-    public PokerHand(){
+    public PokerHand() {
         this.cards = new ArrayList<>();
         this.cardsMap = new HashMap<>();
     }
@@ -311,7 +312,8 @@ import static java.util.stream.Collectors.groupingBy;
             char first = representation.charAt(0);
             value = calculateValue(first);
         }
-        Card(int value, int suit){
+
+        Card(int value, int suit) {
             this.value = value;
             switch (suit) {
                 case 0 -> this.suit = 's';

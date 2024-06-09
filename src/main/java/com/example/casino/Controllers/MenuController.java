@@ -32,7 +32,7 @@ public class MenuController {
     private TextField gameID1;
 
     @FXML
-    public void createPokerGame(){
+    public void createPokerGame() {
         String uniqueID = UUID.randomUUID().toString();
         System.out.println(uniqueID);
         Packet p = new CreateGamePacket("game creation", uniqueID, CreateGamePacket.GameType.POKER);
@@ -40,7 +40,7 @@ public class MenuController {
     }
 
     @FXML
-    public void createRummyGame(){
+    public void createRummyGame() {
         String uniqueID = UUID.randomUUID().toString();
         System.out.println(uniqueID);
         Packet p = new CreateGamePacket("game creation", uniqueID, CreateGamePacket.GameType.RUMMY);
@@ -48,34 +48,34 @@ public class MenuController {
     }
 
     @FXML
-    public void joinPokerGame(){
+    public void joinPokerGame() {
         String uuid = gameID.getText();
-        if (uuid.isEmpty()){
+        if (uuid.isEmpty()) {
             System.out.println("tutaj error");
-        }else {
+        } else {
             JoinGamePacket packet = new JoinGamePacket("JOIN", uuid, JoinGamePacket.GameType.POKER, JoinGamePacket.Status.JOIN);
             Main.client.sendPacket(packet);
         }
     }
 
     @FXML
-    public void joinRummyGame(){
+    public void joinRummyGame() {
         String uuid = gameID1.getText();
-        if (uuid.isEmpty()){
+        if (uuid.isEmpty()) {
             System.out.println("tutaj error");
-        }else {
+        } else {
             JoinGamePacket packet = new JoinGamePacket("JOIN", uuid, JoinGamePacket.GameType.RUMMY, JoinGamePacket.Status.JOIN);
             Main.client.sendPacket(packet);
         }
     }
 
     @FXML
-    public void LogOut(){
+    public void LogOut() {
         Main.client.sendPacket(new LoginPacket("Loging out", LoginPacket.Status.LOGOUT));
     }
 
     @FXML
-    public void closeWindow(){
+    public void closeWindow() {
         Stage stage = (Stage) exit.getScene().getWindow();
         //stage.setIconified(true);
         try {
@@ -91,7 +91,7 @@ public class MenuController {
 
 
     @FXML
-    public void minimizeWindow(){
+    public void minimizeWindow() {
         Stage stage = (Stage) minimize.getScene().getWindow();
         stage.setIconified(true);
     }

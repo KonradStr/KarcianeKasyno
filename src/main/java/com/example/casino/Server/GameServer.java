@@ -35,7 +35,7 @@ public class GameServer {
         System.out.println("---------- URUCHOMIONO SERWER ----------\n");
         System.out.println("ADRES IP SERWERA: " + serverSocket.getInetAddress());
         System.out.println("PORT: " + serverSocket.getLocalPort());
-        while(true) {
+        while (true) {
             new ClientHandler(serverSocket.accept()).start();
         }
     }
