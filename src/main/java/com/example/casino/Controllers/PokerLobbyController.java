@@ -41,13 +41,13 @@ public class PokerLobbyController {
         this.uuid.setText(uuid);
     }
 
-    public void setPokerGame(PokerGame pokerGame){
+    public void setPokerGame(PokerGame pokerGame) {
         this.pokerGame = pokerGame;
     }
 
-    public void refreshPlayerContainer(){
+    public void refreshPlayerContainer() {
         playersContainer.getChildren().clear();
-        for (Map.Entry<Integer, Player> p: this.players.entrySet()){
+        for (Map.Entry<Integer, Player> p : this.players.entrySet()) {
             Integer playerID = p.getKey();
             Player player = p.getValue();
             System.out.println("Lc: " + player.getPlayerData());
@@ -58,14 +58,14 @@ public class PokerLobbyController {
                 MiniPlayerController miniPlayerController = fxmlLoader.getController();
                 miniPlayerController.setData(player.getPlayerData(), player.isReady());
                 playersContainer.getChildren().add(playerBox);
-            }catch(IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
     @FXML
-    public void copyToClipboard(){
+    public void copyToClipboard() {
         final Clipboard clipboard = Clipboard.getSystemClipboard();
         final ClipboardContent content = new ClipboardContent();
         content.putString(uuid.getText());
@@ -73,34 +73,34 @@ public class PokerLobbyController {
     }
 
     @FXML
-    public void leaveGame(){
-        Main.client.sendPacket(new JoinGamePacket("leave", uuid.getText(), JoinGamePacket.GameType.POKER ,JoinGamePacket.Status.LEAVE));
+    public void leaveGame() {
+        Main.client.sendPacket(new JoinGamePacket("leave", uuid.getText(), JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEAVE));
     }
 
-    public void addPlayer(Player player){
+    public void addPlayer(Player player) {
         this.players.put(player.getPlayerID(), player);
     }
 
 
-    public void removePlayer(Player player){
+    public void removePlayer(Player player) {
         this.players.remove(player.getPlayerID());
     }
 
-    public void changeStatus(boolean isReady, Player player){
+    public void changeStatus(boolean isReady, Player player) {
         if (isReady) {
             this.players.get(player.getPlayerID()).setReady(true);
-        }else{
+        } else {
             this.players.get(player.getPlayerID()).setReady(false);
         }
     }
 
 
-    public void ready(){
+    public void ready() {
         if (!isReady) {
-            Main.client.sendPacket(new GameReadyPacket( "ready", GameReadyPacket.GameType.POKER, uuid.getText(), GameReadyPacket.Status.READY));
+            Main.client.sendPacket(new GameReadyPacket("ready", GameReadyPacket.GameType.POKER, uuid.getText(), GameReadyPacket.Status.READY));
             isReady = true;
             ReadyButton.setText("Not Ready");
-        }else{
+        } else {
             Main.client.sendPacket(new GameReadyPacket("notready", GameReadyPacket.GameType.POKER, uuid.getText(), GameReadyPacket.Status.NOT_READY));
             isReady = false;
             ReadyButton.setText("Ready");

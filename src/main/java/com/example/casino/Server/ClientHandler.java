@@ -34,13 +34,14 @@ public class ClientHandler extends Thread {
     }
 
     public PokerHand.Ranks hand() {
-        return  player.pokerHand.rank();
+        return player.pokerHand.rank();
     }
+
     public void run() {
         Packet request;
         while (true) {
             try {
-                request = (Packet)in.readObject();
+                request = (Packet) in.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Nie udało się odczytac pakietu");
                 throw new RuntimeException(e);
@@ -59,22 +60,22 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private void parseRequest(Packet request){
-        switch(request.getType()) {
+    private void parseRequest(Packet request) {
+        switch (request.getType()) {
             case ACK:
                 System.out.println("Dołączył nowy użytkownik: " + clientSocket.getInetAddress());
                 sendPacket(new Packet(PacketType.ACK, "hello"));
                 break;
             case LOGIN: {
-                System.out.println("Prośba logowania: " + clientSocket.getInetAddress() );
-                LoginPacket loginRequest = (LoginPacket)request;
+                System.out.println("Prośba logowania: " + clientSocket.getInetAddress());
+                LoginPacket loginRequest = (LoginPacket) request;
                 String desc = request.getDesc();
                 String username = loginRequest.getLogin();
                 String passw = loginRequest.getPassword();
                 LoginPacket.Status status = loginRequest.getStatus();
-                if (status.equals(LoginPacket.Status.LOGOUT)){
+                if (status.equals(LoginPacket.Status.LOGOUT)) {
                     sendPacket(new LoginPacket("Loging out", LoginPacket.Status.LOGOUT));
-                }else {
+                } else {
                     try {
                         Statement st = connection.createStatement();
                         ResultSet rs = st.executeQuery("select UserID, Password from users where Username='" + username + "'");
@@ -98,7 +99,7 @@ public class ClientHandler extends Thread {
                 break;
             }
             case REGISTER: {
-                System.out.println("Prośba rejestracji " + clientSocket.getInetAddress() );
+                System.out.println("Prośba rejestracji " + clientSocket.getInetAddress());
                 RegisterPacket registerRequest = (RegisterPacket) request;
                 String data = registerRequest.getDesc();
                 String email = registerRequest.getEmail();
@@ -134,7 +135,8 @@ public class ClientHandler extends Thread {
                     throw new RuntimeException(e);
                 }
                 break;
-            }case CREATEGAME: {
+            }
+            case CREATEGAME: {
                 System.out.println("Tworzenie gry");
                 CreateGamePacket createGamePacket = (CreateGamePacket) request;
                 String data = createGamePacket.getDesc();
@@ -145,14 +147,15 @@ public class ClientHandler extends Thread {
                     GameServer.pokerGames.put(UUID, new PokerGame(UUID, this));
                     System.out.println("Stworzono nową gre pokera: " + UUID);
                     sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID, CreateGamePacket.GameType.POKER));
-                }else{
+                } else {
                     GameServer.rummyGames.put(UUID, new RummyGame(UUID, this));
                     System.out.println("Stworzono nową gre remika: " + UUID);
                     sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID, CreateGamePacket.GameType.RUMMY));
                 }
                 break;
-            }case JOINGAME: {
-                JoinGamePacket joinRequest = (JoinGamePacket)request;
+            }
+            case JOINGAME: {
+                JoinGamePacket joinRequest = (JoinGamePacket) request;
                 System.out.println("Dołączanie do gry");
                 System.out.println(joinRequest.getUUID());
                 this.UUID = joinRequest.getUUID();
@@ -170,14 +173,14 @@ public class ClientHandler extends Thread {
                         } else {
                             game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_LEFT));
                         }
-                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(), JoinGamePacket.GameType.POKER,JoinGamePacket.Status.LEFT));
+                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEFT));
                     } else {
                         game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
                         game.players.add(this);
                         game.playersData.add(this.player);
-                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(), JoinGamePacket.GameType.POKER,game.playersData, JoinGamePacket.Status.JOINED));
+                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, game.playersData, JoinGamePacket.Status.JOINED));
                     }
-                }else{
+                } else {
                     RummyGame game = GameServer.rummyGames.get(joinRequest.getUUID());
                     if (status.equals(JoinGamePacket.Status.LEAVE)) {
                         System.out.println("user opuszcza lobby");
@@ -197,7 +200,8 @@ public class ClientHandler extends Thread {
                     }
                 }
                 break;
-            }case GAME_READY_STATUS: {
+            }
+            case GAME_READY_STATUS: {
                 GameReadyPacket gameReadyRequest = (GameReadyPacket) request;
                 String data = gameReadyRequest.getDesc();
                 String uuid = gameReadyRequest.getUUID();
@@ -216,7 +220,7 @@ public class ClientHandler extends Thread {
                         player.setReady(false);
                         GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType, player, uuid, GameReadyPacket.Status.NOT_READY));
                     }
-                }else{
+                } else {
                     if (status.equals(GameReadyPacket.Status.READY)) {
                         System.out.println(++GameServer.rummyGames.get(uuid).playersReady);
                         player.setReady(true);
@@ -236,11 +240,12 @@ public class ClientHandler extends Thread {
                     }
                 }
                 break;
-            } case GAME: {
+            }
+            case GAME: {
                 GamePacket gamePacket = (GamePacket) request;
                 GamePacket.Status gamePacketStatus = gamePacket.getStatus();
                 System.out.println("odebrano pakiet game");
-                if (gamePacketStatus.equals(GamePacket.Status.MOVE)){
+                if (gamePacketStatus.equals(GamePacket.Status.MOVE)) {
                     System.out.println("odebrano pakiet move");
                     System.out.println("1.");
                     GameServer.pokerGames.get(this.UUID).unlockLock();
@@ -248,7 +253,8 @@ public class ClientHandler extends Thread {
                 }
                 break;
 
-            }default:{
+            }
+            default: {
                 System.err.println("NIEZNANY PAKIET");
             }
         }
@@ -256,7 +262,7 @@ public class ClientHandler extends Thread {
     }
 
 
-    public void sendPacket(Packet packet){
+    public void sendPacket(Packet packet) {
         try {
             out.writeObject(packet);
         } catch (IOException e) {

@@ -30,17 +30,18 @@ public class Player implements Serializable {
         this.money = 1000;
         this.pokerHand = new PokerHand();
     }
-    public void clearHand(){
+
+    public void clearHand() {
         this.card1 = null;
         this.card2 = null;
         this.pokerHand.clearHand();
     }
 
-    public String getPlayerData(){
+    public String getPlayerData() {
         return username;
     }
 
-    public Integer getPlayerID(){
+    public Integer getPlayerID() {
         return id;
     }
 
@@ -76,5 +77,8 @@ public class Player implements Serializable {
     public int getMoney() {
         return money;
     }
-    public void pass() {this.passedAway = true;}
+
+    public void pass() {
+        this.passedAway = true;
+    }
 }

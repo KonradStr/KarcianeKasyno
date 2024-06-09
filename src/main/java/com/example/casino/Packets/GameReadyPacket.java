@@ -2,23 +2,24 @@ package com.example.casino.Packets;
 
 import com.example.casino.Player;
 
-public class GameReadyPacket extends Packet{
+public class GameReadyPacket extends Packet {
     private String UUID;
     private Player player;
 
 
-    public enum Status{
+    public enum Status {
         READY,
         NOT_READY,
     }
 
-    public enum GameType{
+    public enum GameType {
         POKER,
         RUMMY,
     }
 
     private GameType gameType;
     private Status status;
+
     public GameReadyPacket(String data, Status status) {
         super(PacketType.GAME_READY_STATUS, data);
         this.status = status;

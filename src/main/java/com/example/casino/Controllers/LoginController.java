@@ -41,19 +41,19 @@ public class LoginController implements Initializable {
         Err.setVisible(false);
     }
 
-    public void login(){
+    public void login() {
         String login = loginField.getText();
         String password = passwordField.getText();
-        if (login.isEmpty() || password.isEmpty()){
+        if (login.isEmpty() || password.isEmpty()) {
             enableErr("NIE PODANO WSZYSTKICH DANYCH");
-        }else{
+        } else {
             Packet p = new LoginPacket("Próba logowania", login, password, LoginPacket.Status.LOGIN);
             Main.client.sendPacket(p);
             System.out.println("wyslano pakiet logowania");
         }
     }
 
-    public void goToRegister(){
+    public void goToRegister() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/casino/Register.fxml"));
             Parent root = loader.load();
@@ -73,12 +73,12 @@ public class LoginController implements Initializable {
     }
 
     @FXML
-    public void onEnter(){
+    public void onEnter() {
         login();
     }
 
     @FXML
-    public void closeWindow(){
+    public void closeWindow() {
         Stage stage = (Stage) exit.getScene().getWindow();
         //stage.setIconified(true);
         try {
@@ -94,7 +94,7 @@ public class LoginController implements Initializable {
 
 
     @FXML
-    public void minimizeWindow(){
+    public void minimizeWindow() {
         Stage stage = (Stage) minimize.getScene().getWindow();
         stage.setIconified(true);
     }

@@ -2,7 +2,7 @@ package com.example.casino.Packets;
 
 import com.example.casino.Player;
 
-public class RegisterPacket extends Packet{
+public class RegisterPacket extends Packet {
 
     private String email;
     private String date;
@@ -11,10 +11,11 @@ public class RegisterPacket extends Packet{
     private Player player;
 
 
-    public enum Status{
+    public enum Status {
         REGISTER,
         ACOUNT_ALREADY_EXISTS_ERROR,
     }
+
     private Status status;
 
     public RegisterPacket(String data, String email, String login, String password, String date, Status status) {

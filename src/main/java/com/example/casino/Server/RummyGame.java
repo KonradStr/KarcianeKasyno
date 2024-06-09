@@ -2,6 +2,7 @@ package com.example.casino.Server;
 
 import com.example.casino.Packets.GamePacket;
 import com.example.casino.Packets.Packet;
+import com.example.casino.Packets.RemikPacket;
 import com.example.casino.Player;
 
 import java.util.ArrayList;
@@ -33,9 +34,9 @@ public class RummyGame implements Callable<Player> {
         this.id = id;
     }
 
-    public void broadcast(Packet packet){
-        for (ClientHandler ch : players){
-            System.out.println("ch" +ch.toString());
+    public void broadcast(Packet packet) {
+        for (ClientHandler ch : players) {
+            System.out.println("ch" + ch.toString());
             ch.sendPacket(packet);
         }
     }
@@ -43,7 +44,22 @@ public class RummyGame implements Callable<Player> {
     @Override
     public Player call() throws Exception {
         Thread.sleep(1000);
-        broadcast(new GamePacket("Game Starting", GamePacket.Status.START));
+
+        List<Player> otherPlayers = new ArrayList<>();
+        for (int i = 0; i < players.size(); i++) {
+            otherPlayers.clear();
+            ClientHandler ch = players.get(i);
+            for (int j = i + 1; j < players.size(); j++) {
+                otherPlayers.add(playersData.get(j));
+            }
+            for (int k = 0; k < i; k++) {
+                otherPlayers.add(playersData.get(k));
+            }
+
+            broadcast(new RemikPacket("Game Starting", RemikPacket.Status.START, ch.getPlayer(), otherPlayers));
+
+        }
+
         return playersData.get(0);
     }
 }

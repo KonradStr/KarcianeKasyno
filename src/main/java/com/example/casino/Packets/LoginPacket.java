@@ -2,18 +2,19 @@ package com.example.casino.Packets;
 
 import com.example.casino.Player;
 
-public class LoginPacket extends Packet{
+public class LoginPacket extends Packet {
 
     private String login;
     private String password;
     private Player player;
 
-    public enum Status{
+    public enum Status {
         LOGIN,
         LOGOUT,
         PASWWORD_ERROR,
         ACOUNT_NOT_FOUND_ERROR
     }
+
     private Status status;
 
     public LoginPacket(String data, String login, String password, Status status) {

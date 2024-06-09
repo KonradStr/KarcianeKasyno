@@ -5,11 +5,10 @@ import com.example.casino.Server.Karta;
 
 import java.util.List;
 
-public class GamePacket extends Packet{
+public class GamePacket extends Packet {
 
 
-
-    public enum Status{
+    public enum Status {
         START,
         FIRST_HAND_CARD,
         SECOND_HAND_CARD,
@@ -18,10 +17,12 @@ public class GamePacket extends Packet{
         SMALL_BLIND,
         BIG_BLIND
     }
-    public enum MOVE_TYPE{
+
+    public enum MOVE_TYPE {
         CALL,
         CHECK
     }
+
     private MOVE_TYPE move_type;
     private Status status;
     private Player player;
@@ -31,6 +32,7 @@ public class GamePacket extends Packet{
 
     private Karta card;
     private List<Player> players;
+
     public GamePacket(String data) {
         super(PacketType.GAME, data);
     }
@@ -40,7 +42,7 @@ public class GamePacket extends Packet{
         this.status = status;
     }
 
-    public GamePacket(String data, Status status, Player player,List<Player> players) {
+    public GamePacket(String data, Status status, Player player, List<Player> players) {
         super(PacketType.GAME, data);
         this.status = status;
         this.players = players;
@@ -52,12 +54,14 @@ public class GamePacket extends Packet{
         this.status = status;
         this.move_type = move_type;
     }
+
     public GamePacket(String data, Status status, MOVE_TYPE move_type, Integer currentBid) {
         super(PacketType.GAME, data);
         this.status = status;
         this.move_type = move_type;
         this.currentBid = currentBid;
     }
+
     public GamePacket(String data, Status status, Player player) {
         super(PacketType.GAME, data);
         this.status = status;

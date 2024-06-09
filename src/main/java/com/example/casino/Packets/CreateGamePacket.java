@@ -1,13 +1,14 @@
 package com.example.casino.Packets;
 
-public class CreateGamePacket extends Packet{
+public class CreateGamePacket extends Packet {
 
     private String UUID;
 
-    public enum GameType{
+    public enum GameType {
         POKER,
         RUMMY
     }
+
     private GameType gameType;
 
     public CreateGamePacket(String data, String UUID) {

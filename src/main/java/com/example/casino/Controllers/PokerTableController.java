@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public class PokerTableController implements Initializable {
-      @FXML
+    @FXML
     private Button CallButton;
 
     @FXML
@@ -109,15 +109,14 @@ public class PokerTableController implements Initializable {
     private Integer currentBid;
 
 
-
     @FXML
-    public void callFunc(){
+    public void callFunc() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
     }
 
 
     @FXML
-    public void checkFunc(){
+    public void checkFunc() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
         disableButtonCall();
         disableButtonFold();
@@ -126,7 +125,7 @@ public class PokerTableController implements Initializable {
     }
 
     @FXML
-    public void foldFunc(){
+    public void foldFunc() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
         disableButtonCall();
         disableButtonFold();
@@ -135,7 +134,7 @@ public class PokerTableController implements Initializable {
     }
 
     @FXML
-    public void raiseFunc(){
+    public void raiseFunc() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
         disableButtonCall();
         disableButtonFold();
@@ -144,7 +143,7 @@ public class PokerTableController implements Initializable {
     }
 
     @FXML
-    public void nextPlayer(){
+    public void nextPlayer() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
         disableButtonCall();
         disableButtonFold();
@@ -152,7 +151,7 @@ public class PokerTableController implements Initializable {
         disableButtonCheck();
     }
 
-    public void setYourData(String username){
+    public void setYourData(String username) {
         this.yourUsername.setText(username);
         this.yourMoney.setText("1000");
     }
@@ -160,16 +159,16 @@ public class PokerTableController implements Initializable {
     public void setYourCard1(Karta yourCard1) {
         String rank = Rank.rank.get(yourCard1.rank.toString());
         String color = yourCard1.kolor.toString();
-        this.yourCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/"+rank+color+".png")));
+        this.yourCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
     }
 
     public void setYourCard2(Karta yourCard2) {
         String rank = Rank.rank.get(yourCard2.rank.toString());
         String color = yourCard2.kolor.toString();
-        this.yourCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/"+rank+color+".png")));
+        this.yourCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
     }
 
-    public void assignPlayers(List<Player> plyerList){
+    public void assignPlayers(List<Player> plyerList) {
         // TODO : popraw to prosze
         System.out.println("Liczba pozostałych graczy: " + plyerList.size());
         Player player1 = plyerList.get(0);
@@ -254,45 +253,47 @@ public class PokerTableController implements Initializable {
         }
     }
 
-    public void smallBlind(){
+    public void smallBlind() {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 5));
     }
-    public void otherSmallBlind(Player player){
+
+    public void otherSmallBlind(Player player) {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
-        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 5));
-    }
-    public void otherBigBlind(Player player){
-        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
-        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 10));
+        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney()) - 5));
     }
 
-    public void bigBlind(){
+    public void otherBigBlind(Player player) {
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
+        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney()) - 10));
+    }
+
+    public void bigBlind() {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 10));
     }
 
-    public void setTableCard(Integer cardIndex, Karta card){
+    public void setTableCard(Integer cardIndex, Karta card) {
         String rank = Rank.rank.get(card.rank.toString());
         String color = card.kolor.toString();
-        switch (cardIndex){
-            case 1 :{
+        switch (cardIndex) {
+            case 1: {
                 TableCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 2 :{
+            case 2: {
                 TableCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 3 :{
+            case 3: {
                 TableCard3.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 4 :{
+            case 4: {
                 TableCard4.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 5 :{
+            case 5: {
                 TableCard5.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
@@ -300,7 +301,7 @@ public class PokerTableController implements Initializable {
 
     }
 
-    public void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid){
+    public void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid) {
         this.currentBid = currentBid;
         if (moveType.equals(GamePacket.MOVE_TYPE.CHECK)) {
             enableButtonFold();
@@ -309,7 +310,7 @@ public class PokerTableController implements Initializable {
             enableButtonCheck();
             hideButtonCall();
             showButtonCheck();
-        }else{
+        } else {
             enableButtonFold();
             enableButtonRaise();
             disableButtonCheck();
@@ -318,7 +319,8 @@ public class PokerTableController implements Initializable {
             showButtonCall();
         }
     }
-    public void otherMakeMove(){
+
+    public void otherMakeMove() {
         System.out.println("ktos robi ruchy");
     }
 
@@ -333,47 +335,51 @@ public class PokerTableController implements Initializable {
         this.playersFields = new HashMap<>();
     }
 
-    private void disableButtonCall(){
+    private void disableButtonCall() {
         this.CallButton.setDisable(true);
     }
 
-    private void disableButtonCheck(){
+    private void disableButtonCheck() {
         this.CheckButton.setDisable(true);
     }
-    private void disableButtonRaise(){
+
+    private void disableButtonRaise() {
         this.RaiseButton.setDisable(true);
     }
 
-    private void disableButtonFold(){
+    private void disableButtonFold() {
         this.FoldButton.setDisable(true);
     }
-    private void enableButtonCall(){
+
+    private void enableButtonCall() {
         this.CallButton.setDisable(false);
     }
 
-    private void enableButtonCheck(){
+    private void enableButtonCheck() {
         this.CheckButton.setDisable(false);
     }
-    private void enableButtonRaise(){
+
+    private void enableButtonRaise() {
         this.RaiseButton.setDisable(false);
     }
 
-    private void enableButtonFold(){
+    private void enableButtonFold() {
         this.FoldButton.setDisable(false);
     }
 
-    private void hideButtonCheck(){
+    private void hideButtonCheck() {
         this.CheckButton.setVisible(false);
     }
 
-    private void showButtonCheck(){
+    private void showButtonCheck() {
         this.CheckButton.setVisible(true);
     }
-    private void hideButtonCall(){
+
+    private void hideButtonCall() {
         this.CallButton.setVisible(false);
     }
 
-    private void showButtonCall(){
+    private void showButtonCall() {
         this.CallButton.setVisible(true);
     }
 }
