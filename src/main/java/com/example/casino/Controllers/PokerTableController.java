@@ -113,12 +113,17 @@ public class PokerTableController implements Initializable {
     @FXML
     public void callFunc(){
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
+        disableButtonCall();
+        disableButtonFold();
+        disableButtonRaise();
+        disableButtonCheck();
+
     }
 
 
     @FXML
     public void checkFunc(){
-        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CHECK));
         disableButtonCall();
         disableButtonFold();
         disableButtonRaise();
@@ -127,7 +132,7 @@ public class PokerTableController implements Initializable {
 
     @FXML
     public void foldFunc(){
-        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.FOLD));
         disableButtonCall();
         disableButtonFold();
         disableButtonRaise();
@@ -136,7 +141,7 @@ public class PokerTableController implements Initializable {
 
     @FXML
     public void raiseFunc(){
-        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.RAISE));
         disableButtonCall();
         disableButtonFold();
         disableButtonRaise();

@@ -20,22 +20,22 @@
          <children>
             <StackPane prefHeight="150.0" prefWidth="200.0">
                <children>
-                  <ImageView fitHeight="720.0" fitWidth="625.0" opacity="0.51" pickOnBounds="true">
+                  <ImageView fitHeight="747.0" fitWidth="628.0" opacity="0.59" pickOnBounds="true">
                      <image>
-                        <Image url="@../../../images/pokerbg.png" />
+                        <Image url="@../../../images/menubg1.png" />
                      </image>
                      <effect>
                         <GaussianBlur radius="11.77" />
                      </effect>
                   </ImageView>
-                  <Rectangle arcHeight="5.0" arcWidth="100.0" fill="#808489" height="439.0" opacity="0.83" stroke="BLACK" strokeLineCap="BUTT" strokeLineJoin="BEVEL" strokeWidth="0.5" width="501.0">
+                  <Rectangle arcHeight="5.0" arcWidth="100.0" fill="#808489" height="439.0" opacity="0.82" stroke="BLACK" strokeLineCap="BUTT" strokeLineJoin="BEVEL" strokeWidth="0.5" width="501.0">
                      <effect>
                         <GaussianBlur radius="2.0" />
                      </effect>
                   </Rectangle>
                   <AnchorPane prefHeight="750.0" prefWidth="627.0">
                      <children>
-                        <Label alignment="CENTER" layoutX="4.0" layoutY="72.0" prefHeight="71.0" prefWidth="627.0" text="POKER">
+                        <Label alignment="CENTER" layoutX="4.0" layoutY="72.0" prefHeight="71.0" prefWidth="627.0" text="POKER" textFill="#171616">
                            <font>
                               <Font name="Microsoft JhengHei Bold" size="51.0" />
                            </font>
@@ -70,7 +70,7 @@
             </StackPane>
             <StackPane prefHeight="750.0" prefWidth="561.0">
                <children>
-                  <ImageView fitHeight="720.0" fitWidth="625.0" opacity="0.51" pickOnBounds="true">
+                  <ImageView fitHeight="742.0" fitWidth="634.0" opacity="0.51" pickOnBounds="true">
                      <image>
                         <Image url="@../../../images/remikbg.png" />
                      </image>
@@ -86,7 +86,7 @@
                   <AnchorPane prefHeight="750.0" prefWidth="620.0">
                      <children>
                         <Button fx:id="LogoutButton" layoutX="-46.0" layoutY="674.0" mnemonicParsing="false" onAction="#LogOut" prefHeight="52.0" prefWidth="91.0" text="Wyloguj się" />
-                        <Label alignment="CENTER" layoutX="4.0" layoutY="74.0" prefHeight="71.0" prefWidth="627.0" text="REMIK">
+                        <Label alignment="CENTER" layoutX="4.0" layoutY="74.0" prefHeight="71.0" prefWidth="627.0" text="REMIK" textFill="#1b1717">
                            <font>
                               <Font name="Microsoft JhengHei Bold" size="51.0" />
                            </font>

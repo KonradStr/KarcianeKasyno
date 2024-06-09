@@ -158,7 +158,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             for (ClientHandler ch : players){
                 System.out.println(ch.getPlayer().getPlayerData());
 
-                ch.sendPacket(new GamePacket("your move", GamePacket.Status.MOVE));
+                ch.sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
                 for (ClientHandler otherCh : players) {
                     if (!otherCh.equals(ch)) {
                         otherCh.sendPacket(new GamePacket("other player move", GamePacket.Status.MOVE, ch.getPlayer()));
