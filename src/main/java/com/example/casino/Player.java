@@ -19,6 +19,8 @@ public class Player implements Serializable {
     private Karta card1;
     private Karta card2;
     public PokerHand pokerHand;
+    public boolean passedAway;
+
     private Integer money;
 
     public Player(Integer id, String username, boolean isReady) {
@@ -69,4 +71,5 @@ public class Player implements Serializable {
     public int getMoney() {
         return money;
     }
+    public void pass() {this.passedAway = true;}
 }

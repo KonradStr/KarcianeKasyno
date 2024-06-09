@@ -84,6 +84,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             this.tableCards.add(talia.KartaZTalii());
         }
         for (Player p : playersData){
+            p.passedAway = false;
             p.setMoney(1000);
             p.pokerHand.addHand(tableCards);
         }
