@@ -6,6 +6,7 @@ import com.example.casino.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -26,13 +27,15 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
         ClientHandler highestHand = players.get(0);
         for (ClientHandler ch:
              players) {
-            if(ch.hand().getRank() > highestHand.hand().getRank())
+            if (Objects.requireNonNull(highestHand.getPlayer().pokerHand.compareWith(ch.getPlayer().pokerHand))
+                    == PokerHand.Result.LOSS) {
                 highestHand = ch;
+            }
         }
         ArrayList<ClientHandler> ret = new ArrayList<>();
         for (ClientHandler ch:
              players) {
-            if(ch.hand().getRank() == highestHand.hand().getRank())
+            if(highestHand.getPlayer().pokerHand.compareWith(ch.getPlayer().pokerHand) == PokerHand.Result.TIE)
                 ret.add(ch);
         }
         return ret;
