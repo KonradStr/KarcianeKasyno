@@ -226,35 +226,10 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
                     GamePacket.Status.TABLE_CARDS, i, tableCards.get(i - 1)));
             Thread.sleep(1500);
         }
-<<<<<<< HEAD
-        for (int i = 0; i < 3; i++){
-            System.out.println("runda :" + i+1);
-            for (ClientHandler ch : players){
-                System.out.println(ch.getPlayer().getPlayerData());
-
-                ch.sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
-                for (ClientHandler otherCh : players) {
-                    if (!otherCh.equals(ch)) {
-                        otherCh.sendPacket(new GamePacket("other player move", GamePacket.Status.MOVE, ch.getPlayer()));
-                    }
-                }
-                lock.lock();
-                while (!nextPlayer) {
-                    next.await();
-                }
-                lock.unlock();
-                nextPlayer = false;
-            }
-            System.out.println("dalsze działanie");
-            if (i == 2) break;
-            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i + 4, tableCards.get(i+3)));
-            Thread.sleep(1500);
-=======
         turn();
         int temp = players.size();
         for (ClientHandler ch : players) {
             if (ch.getPlayer().passedAway) temp--;
->>>>>>> 2b237498071093505e9f3d15798a28922ca1bed9
         }
         if (temp <= 1) return Showdown();
         broadcast(new GamePacket("środkowe karta:",
@@ -307,9 +282,10 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
          */
         players.addLast(players.removeFirst());
         return Showdown();
+
     }
 
-    private void turn() throws InterruptedException {
+    private void turn () throws InterruptedException {
         while (!canProceed()) {
             for (int i = 0; i < playersData.size(); i++) {
                 players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid));
@@ -324,7 +300,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     }
 
 
-    public void unlockLock() {
+    public void unlockLock () {
         this.nextPlayer = true;
         lock.lock();
         this.next.signal();
