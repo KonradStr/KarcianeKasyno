@@ -280,29 +280,30 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             System.out.println("next iteration");
         }
          */
-        players.addLast(players.removeFirst());
-        return Showdown();
+            players.addLast(players.removeFirst());
+            return Showdown();
+
     }
 
-    private void turn() throws InterruptedException {
-        while (!canProceed()) {
-            for (int i = 0; i < playersData.size(); i++) {
-                players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid));
-                lock.lock();
-                while (!nextPlayer) {
-                    next.await();
+        private void turn () throws InterruptedException {
+            while (!canProceed()) {
+                for (int i = 0; i < playersData.size(); i++) {
+                    players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid));
+                    lock.lock();
+                    while (!nextPlayer) {
+                        next.await();
+                    }
+                    lock.unlock();
+                    nextPlayer = false;
                 }
-                lock.unlock();
-                nextPlayer = false;
             }
         }
-    }
 
 
-    public void unlockLock() {
-        this.nextPlayer = true;
-        lock.lock();
-        this.next.signal();
-        lock.unlock();
+        public void unlockLock () {
+            this.nextPlayer = true;
+            lock.lock();
+            this.next.signal();
+            lock.unlock();
+        }
     }
-}
