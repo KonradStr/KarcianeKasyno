@@ -282,7 +282,6 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
          */
             players.addLast(players.removeFirst());
             return Showdown();
-
     }
 
         private void turn () throws InterruptedException {

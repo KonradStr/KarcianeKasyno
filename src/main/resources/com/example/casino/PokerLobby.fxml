@@ -9,7 +9,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="750.0" prefWidth="1250.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.Controllers.PokerLobbyController">
+<AnchorPane prefHeight="750.0" prefWidth="1250.0" style="-fx-background-color: grey;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.Controllers.PokerLobbyController">
     <children>
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="83.0" opacity="0.76" stroke="BLACK" strokeType="INSIDE" width="1258.0" />
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="83.0" layoutY="667.0" opacity="0.76" stroke="BLACK" strokeType="INSIDE" width="1258.0" />

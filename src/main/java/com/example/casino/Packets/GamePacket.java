@@ -20,7 +20,9 @@ public class GamePacket extends Packet {
 
     public enum MOVE_TYPE {
         CALL,
-        CHECK
+        CHECK,
+        RAISE,
+        FOLD
     }
 
     private MOVE_TYPE move_type;
