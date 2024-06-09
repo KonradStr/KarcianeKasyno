@@ -27,6 +27,7 @@ public class GamePacket extends Packet{
     private Player player;
     private int moneyPool;
     private Integer cardindex;
+    private Integer currentBid;
 
     private Karta card;
     private List<Player> players;
@@ -50,6 +51,12 @@ public class GamePacket extends Packet{
         super(PacketType.GAME, data);
         this.status = status;
         this.move_type = move_type;
+    }
+    public GamePacket(String data, Status status, MOVE_TYPE move_type, Integer currentBid) {
+        super(PacketType.GAME, data);
+        this.status = status;
+        this.move_type = move_type;
+        this.currentBid = currentBid;
     }
     public GamePacket(String data, Status status, Player player) {
         super(PacketType.GAME, data);
@@ -98,5 +105,9 @@ public class GamePacket extends Packet{
 
     public MOVE_TYPE getMove_type() {
         return move_type;
+    }
+
+    public Integer getCurrentBid() {
+        return currentBid;
     }
 }

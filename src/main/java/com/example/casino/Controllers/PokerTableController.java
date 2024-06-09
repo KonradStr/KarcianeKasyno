@@ -106,8 +106,42 @@ public class PokerTableController implements Initializable {
     private Label yourUsername;
 
     private Map<Player, PlayerFields> playersFields;
+    private Integer currentBid;
 
 
+
+    @FXML
+    public void callFunc(){
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
+    }
+
+
+    @FXML
+    public void checkFunc(){
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+        disableButtonCall();
+        disableButtonFold();
+        disableButtonRaise();
+        disableButtonCheck();
+    }
+
+    @FXML
+    public void foldFunc(){
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+        disableButtonCall();
+        disableButtonFold();
+        disableButtonRaise();
+        disableButtonCheck();
+    }
+
+    @FXML
+    public void raiseFunc(){
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
+        disableButtonCall();
+        disableButtonFold();
+        disableButtonRaise();
+        disableButtonCheck();
+    }
 
     @FXML
     public void nextPlayer(){
@@ -266,10 +300,23 @@ public class PokerTableController implements Initializable {
 
     }
 
-    public void makeMove(){
-        enableButtonFold();
-        enableButtonRaise();
-        enableButtonCall();
+    public void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid){
+        this.currentBid = currentBid;
+        if (moveType.equals(GamePacket.MOVE_TYPE.CHECK)) {
+            enableButtonFold();
+            enableButtonRaise();
+            disableButtonCall();
+            enableButtonCheck();
+            hideButtonCall();
+            showButtonCheck();
+        }else{
+            enableButtonFold();
+            enableButtonRaise();
+            disableButtonCheck();
+            enableButtonCall();
+            hideButtonCheck();
+            showButtonCall();
+        }
     }
     public void otherMakeMove(){
         System.out.println("ktos robi ruchy");

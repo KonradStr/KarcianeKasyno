@@ -214,7 +214,7 @@ public class Client extends Thread{
                         );
                     }else{
                         Platform.runLater(() ->
-                                makeMove()
+                                makeMove(gamePacket.getMove_type(), gamePacket.getCurrentBid())
                         );
                     }
                 }
@@ -374,8 +374,8 @@ public class Client extends Thread{
         this.ptc.setTableCard(cardIndex, card);
     }
 
-    private void makeMove(){
-        this.ptc.makeMove();
+    private void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid){
+        this.ptc.makeMove(moveType, currentBid);
     }
     private void otherMakeMove(Player player){
         this.ptc.otherMakeMove();

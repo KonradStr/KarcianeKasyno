@@ -11,6 +11,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.example.casino.Server.GameServer.connection;
 
@@ -19,8 +21,6 @@ public class ClientHandler extends Thread {
     private Socket clientSocket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
-    private Object monitorObj;
-
     private String UUID;
 
     public ClientHandler(Socket socket) {
@@ -209,12 +209,7 @@ public class ClientHandler extends Thread {
                         player.setReady(true);
                         GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType, player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.pokerGames.get(uuid).playersReady == 2) {
-                            Future<ArrayList<ClientHandler>> future = GameServer.executorService.submit(GameServer.pokerGames.get(uuid));
-                            try {
-                                System.out.println(future.get());
-                            } catch (InterruptedException | ExecutionException e) {
-                                throw new RuntimeException(e);
-                            }
+                            GameServer.executorService.submit(GameServer.pokerGames.get(uuid));
                         }
                     } else {
                         GameServer.pokerGames.get(uuid).playersReady--;
@@ -247,12 +242,8 @@ public class ClientHandler extends Thread {
                 System.out.println("odebrano pakiet game");
                 if (gamePacketStatus.equals(GamePacket.Status.MOVE)){
                     System.out.println("odebrano pakiet move");
-                    this.monitorObj = GameServer.pokerGames.get(this.UUID).getMonitorObj();
                     System.out.println("1.");
-                    synchronized(monitorObj) {
-                        GameServer.pokerGames.get(this.UUID).nextPlayer = true;
-                        this.monitorObj.notify();
-                    }
+                    GameServer.pokerGames.get(this.UUID).unlockLock();
                     System.out.println("2.");
                 }
                 break;

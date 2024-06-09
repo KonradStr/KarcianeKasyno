@@ -23,6 +23,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     private Talia deck = new Talia(false);
     final Lock lock = new ReentrantLock();
     final Condition next = lock.newCondition();
+    Integer currentBid;
     private ArrayList<ClientHandler> Winners() {
         ClientHandler highestHand = players.get(0);
         for (ClientHandler ch:
@@ -42,7 +43,6 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     }
 
     boolean nextPlayer = false;
-    Object monitorObj = new Object();
 
     Talia talia;
     int moneyPool;
@@ -50,6 +50,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
 
 
     public PokerGame(String id) {
+        currentBid = 0;
         moneyPool = 0;
         playersReady = 0;
         players = new ArrayList<>();
@@ -59,6 +60,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     }
 
     public PokerGame(String id, ClientHandler ch) {
+        currentBid = 0;
         playersReady = 0;
         players = new ArrayList<>();
         playersData = new ArrayList<>();
@@ -107,6 +109,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             System.out.println("Liczba graczy");
             ch.sendPacket(new GamePacket("Game Starting", GamePacket.Status.START, ch.getPlayer(),otherPlayers));
         }
+        Thread.sleep(1000);
         for (ClientHandler ch : players){
             Karta card = talia.KartaZTalii();
             ch.sendPacket(new GamePacket("FirstHandCard", GamePacket.Status.FIRST_HAND_CARD, card));
@@ -127,7 +130,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
                 ch.sendPacket(new GamePacket("someone put small blind", GamePacket.Status.SMALL_BLIND, players.get(0).getPlayer()));
             }
         }
-        Thread.sleep(4000);
+        Thread.sleep(2000);
         playersData.get(1).setMoney(playersData.get(1).getMoney() - 10);
         moneyPool += 10;
         players.get(1).sendPacket(new GamePacket("big blind", GamePacket.Status.BIG_BLIND, moneyPool));
@@ -136,33 +139,41 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
                 ch.sendPacket(new GamePacket("someone put small blind", GamePacket.Status.BIG_BLIND, players.get(1).getPlayer()));
             }
         }
+        currentBid = 10;
         for (int i = 2; i < playersData.size(); i++){
-            synchronized (monitorObj) {
-                players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE));
-                monitorObj.wait();
+            players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid));
+            lock.lock();
+            while (!nextPlayer) {
+                next.await();
             }
+            lock.unlock();
+            nextPlayer = false;
         }
         for (int i = 1; i <= 3; i++) {
-            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i, talia.KartaZTalii()));
+            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i, tableCards.get(i-1)));
             Thread.sleep(1500);
         }
         for (int i = 0; i < 3; i++){
+            System.out.println("runda :" + i+1);
             for (ClientHandler ch : players){
                 System.out.println(ch.getPlayer().getPlayerData());
-                synchronized (monitorObj) {
-                    ch.sendPacket(new GamePacket("your move", GamePacket.Status.MOVE));
-                    for (ClientHandler otherCh : players) {
-                        if (!otherCh.equals(ch)) {
-                            otherCh.sendPacket(new GamePacket("other player move", GamePacket.Status.MOVE, ch.getPlayer()));
-                        }
-                    }
-                    while(!nextPlayer) {
-                        monitorObj.wait();
+
+                ch.sendPacket(new GamePacket("your move", GamePacket.Status.MOVE));
+                for (ClientHandler otherCh : players) {
+                    if (!otherCh.equals(ch)) {
+                        otherCh.sendPacket(new GamePacket("other player move", GamePacket.Status.MOVE, ch.getPlayer()));
                     }
                 }
-                System.out.println("dalsze działanie");
+                lock.lock();
+                while (!nextPlayer) {
+                    next.await();
+                }
+                lock.unlock();
+                nextPlayer = false;
             }
-            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i, talia.KartaZTalii()));
+            System.out.println("dalsze działanie");
+            if (i == 2) break;
+            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i + 4, tableCards.get(i+3)));
             Thread.sleep(1500);
         }
         /*
@@ -182,10 +193,10 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     }
 
 
-
-    public Object getMonitorObj() {
-        return monitorObj;
+    public void unlockLock(){
+        this.nextPlayer = true;
+        lock.lock();
+        this.next.signal();
+        lock.unlock();
     }
-
-
 }
