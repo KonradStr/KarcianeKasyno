@@ -17,7 +17,6 @@ public class PokerHand implements Serializable {
         if (cards.size() == 7) {
             cardsMap = Helpers.getValueMap(cards);
             cards.sort(Comparator.comparingInt(o -> o.value));
-
         }
     }
 

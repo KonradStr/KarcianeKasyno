@@ -287,7 +287,8 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
         private void turn () throws InterruptedException {
             while (!canProceed()) {
                 for (int i = 0; i < playersData.size(); i++) {
-                    players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid));
+                    players.get(i).sendPacket(new GamePacket("your move",
+                            GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid));
                     lock.lock();
                     while (!nextPlayer) {
                         next.await();

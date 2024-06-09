@@ -248,6 +248,11 @@ public class ClientHandler extends Thread {
                 if (gamePacketStatus.equals(GamePacket.Status.MOVE)) {
                     System.out.println("odebrano pakiet move");
                     System.out.println("1.");
+                    switch (gamePacket.getMove_type()){
+                        case FOLD -> GameServer.pokerGames.get(UUID).handlerFold(this);
+                        case CALL -> GameServer.pokerGames.get(UUID).handlerCall(this);
+                        case RAISE -> GameServer.pokerGames.get(UUID).handlerRaise(this, 50);
+                    }
                     GameServer.pokerGames.get(this.UUID).unlockLock();
                     System.out.println("2.");
                 }
