@@ -192,7 +192,9 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
         Thread.sleep(1000);
         handlerRaise(players.get(0), 5);
         players.get(0).sendPacket(new GamePacket("small blind",
-                GamePacket.Status.SMALL_BLIND, moneyPool));
+                GamePacket.Status.SMALL_BLIND
+                , moneyPool));
+
         for (ClientHandler ch : players) {
             if (!ch.equals(players.get(0))) {
                 ch.sendPacket(new GamePacket("someone put small blind",
@@ -213,6 +215,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             players.get(i).sendPacket(new GamePacket("your move",
                     GamePacket.Status.MOVE,
                     GamePacket.MOVE_TYPE.CALL, currentBid));
+
             lock.lock();
             while (!nextPlayer) {
                 next.await();

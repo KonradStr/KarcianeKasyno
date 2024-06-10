@@ -15,6 +15,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.example.casino.Server.GameServer.connection;
+import static com.example.casino.Server.GameServer.furas;
 
 public class ClientHandler extends Thread {
     private Player player;
@@ -78,7 +79,8 @@ public class ClientHandler extends Thread {
                 } else {
                     try {
                         Statement st = connection.createStatement();
-                        ResultSet rs = st.executeQuery("select UserID, Password from users where Username='" + username + "'");
+                        ResultSet rs = st.executeQuery("select UserID, Password from users where Username='"
+                                + username + "'");
                         if (rs.next()) {
                             Integer userID = rs.getInt(1);
                             String password = rs.getString(2);
@@ -90,7 +92,8 @@ public class ClientHandler extends Thread {
                                 sendPacket(new LoginPacket("PasswordError", LoginPacket.Status.PASWWORD_ERROR));
                             }
                         } else {
-                            sendPacket(new LoginPacket("AccountNotFoundError", LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR));
+                            sendPacket(new LoginPacket("AccountNotFoundError",
+                                    LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR));
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -112,7 +115,8 @@ public class ClientHandler extends Thread {
                     ResultSet rs = st.executeQuery("select * from users where Email='" + email + "'");
 
                     if (rs.next()) {
-                        sendPacket(new RegisterPacket("Account already exists", RegisterPacket.Status.ACOUNT_ALREADY_EXISTS_ERROR));
+                        sendPacket(new RegisterPacket("Account already exists",
+                                RegisterPacket.Status.ACOUNT_ALREADY_EXISTS_ERROR));
                     } else {
                         String sql = "INSERT INTO users (Username, Email, Password, DateOfBirth) VALUES (?,?,?,?)";
                         PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -146,11 +150,13 @@ public class ClientHandler extends Thread {
                 if (gameType.equals(CreateGamePacket.GameType.POKER)) {
                     GameServer.pokerGames.put(UUID, new PokerGame(UUID, this));
                     System.out.println("Stworzono nową gre pokera: " + UUID);
-                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID, CreateGamePacket.GameType.POKER));
+                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID,
+                            CreateGamePacket.GameType.POKER));
                 } else {
                     GameServer.rummyGames.put(UUID, new RummyGame(UUID, this));
                     System.out.println("Stworzono nową gre remika: " + UUID);
-                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID, CreateGamePacket.GameType.RUMMY));
+                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID,
+                            CreateGamePacket.GameType.RUMMY));
                 }
                 break;
             }
@@ -171,14 +177,18 @@ public class ClientHandler extends Thread {
                         if (game.players.isEmpty()) {
                             GameServer.pokerGames.remove(joinRequest.getUUID());
                         } else {
-                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_LEFT));
+                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(),
+                                    JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_LEFT));
                         }
-                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEFT));
+                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEFT));
                     } else {
-                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
+                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
                         game.players.add(this);
                         game.playersData.add(this.player);
-                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, game.playersData, JoinGamePacket.Status.JOINED));
+                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.POKER, game.playersData, JoinGamePacket.Status.JOINED));
                     }
                 } else {
                     RummyGame game = GameServer.rummyGames.get(joinRequest.getUUID());
@@ -189,14 +199,18 @@ public class ClientHandler extends Thread {
                         if (game.players.isEmpty()) {
                             GameServer.rummyGames.remove(joinRequest.getUUID());
                         } else {
-                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_LEFT));
+                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(),
+                                    JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_LEFT));
                         }
-                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, JoinGamePacket.Status.LEFT));
+                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.RUMMY, JoinGamePacket.Status.LEFT));
                     } else {
-                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_JOIN));
+                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_JOIN));
                         game.players.add(this);
                         game.playersData.add(this.player);
-                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, game.playersData, JoinGamePacket.Status.JOINED));
+                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.RUMMY, game.playersData, JoinGamePacket.Status.JOINED));
                     }
                 }
                 break;
@@ -211,20 +225,24 @@ public class ClientHandler extends Thread {
                     if (status.equals(GameReadyPacket.Status.READY)) {
                         System.out.println(++GameServer.pokerGames.get(uuid).playersReady);
                         player.setReady(true);
-                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType, player, uuid, GameReadyPacket.Status.READY));
+                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType,
+                                player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.pokerGames.get(uuid).playersReady == 2) {
-                            GameServer.executorService.submit(GameServer.pokerGames.get(uuid));
+
+                            furas.add(GameServer.executorService.submit(GameServer.pokerGames.get(uuid)));
                         }
                     } else {
                         GameServer.pokerGames.get(uuid).playersReady--;
                         player.setReady(false);
-                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType, player, uuid, GameReadyPacket.Status.NOT_READY));
+                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType,
+                                player, uuid, GameReadyPacket.Status.NOT_READY));
                     }
                 } else {
                     if (status.equals(GameReadyPacket.Status.READY)) {
                         System.out.println(++GameServer.rummyGames.get(uuid).playersReady);
                         player.setReady(true);
-                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType, player, uuid, GameReadyPacket.Status.READY));
+                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType,
+                                player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.rummyGames.get(uuid).playersReady == 2) {
                             Future<Player> future = GameServer.executorService.submit(GameServer.rummyGames.get(uuid));
                             try {
@@ -236,7 +254,8 @@ public class ClientHandler extends Thread {
                     } else {
                         GameServer.rummyGames.get(uuid).playersReady--;
                         player.setReady(false);
-                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType, player, uuid, GameReadyPacket.Status.NOT_READY));
+                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType,
+                                player, uuid, GameReadyPacket.Status.NOT_READY));
                     }
                 }
                 break;

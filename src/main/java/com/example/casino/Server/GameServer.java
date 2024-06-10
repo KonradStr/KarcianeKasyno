@@ -5,10 +5,12 @@ import java.net.ServerSocket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class GameServer {
     private ServerSocket serverSocket;
@@ -28,6 +30,8 @@ public class GameServer {
     public static Map<String, RummyGame> rummyGames = new HashMap<>();
 
     public static ExecutorService executorService;
+    public static ArrayList<Future<ArrayList<ClientHandler>>> furas;
+
 
     public void start(int port) throws IOException {
         executorService = Executors.newFixedThreadPool(100);
