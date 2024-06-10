@@ -14,7 +14,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 
 public class RegisterController implements Initializable {
 
@@ -40,7 +43,8 @@ public class RegisterController implements Initializable {
     private TextField usernameField;
 
     @FXML
-    private void register() {
+    private void register() throws NoSuchAlgorithmException, InvalidKeySpecException,
+            ExecutionException, InterruptedException {
         System.out.println("klienieto przycisk");
         String email = emailField.getText();
         String login = usernameField.getText();
@@ -71,7 +75,8 @@ public class RegisterController implements Initializable {
     }
 
     @FXML
-    void onEnter(ActionEvent event) {
+    void onEnter(ActionEvent event) throws NoSuchAlgorithmException,
+            InvalidKeySpecException, ExecutionException, InterruptedException {
         register();
     }
 

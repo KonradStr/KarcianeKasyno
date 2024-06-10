@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.concurrent.Callable;
 
 public class PassHash implements Callable<Pair<String, String>> {
-    PassHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public PassHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         prehash = password;
 
     }
