@@ -155,12 +155,36 @@
             </StackPane>
          </children>
       </HBox>
-      <StackPane layoutY="636.0" prefHeight="114.0" prefWidth="1250.0">
+      <StackPane layoutY="637.0" prefHeight="113.0" prefWidth="1250.0">
          <children>
+            <Button fx:id="goToRemikRankingButton" mnemonicParsing="false" onAction="#goToRemikRanking" style="-fx-background-color: transparent;">
+               <graphic>
+                  <ImageView fitHeight="103.0" fitWidth="103.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../images/puchar.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <StackPane.margin>
+                  <Insets left="650.0" />
+               </StackPane.margin>
+            </Button>
             <Button fx:id="LogoutButton" alignment="CENTER" mnemonicParsing="false" onAction="#LogOut" prefHeight="52.0" prefWidth="91.0" style="-fx-background-radius: 10;" text="Wyloguj się" StackPane.alignment="BOTTOM_CENTER">
                <StackPane.margin>
                   <Insets bottom="30.0" />
                </StackPane.margin>
+            </Button>
+            <Button fx:id="goToPokerRankingButton" mnemonicParsing="false" onAction="#goToPokerRanking" prefHeight="103.0" prefWidth="103.0" style="-fx-background-color: transparent;">
+               <StackPane.margin>
+                  <Insets right="650.0" />
+               </StackPane.margin>
+               <graphic>
+                  <ImageView fitHeight="103.0" fitWidth="103.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../images/puchar.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
             </Button>
          </children>
       </StackPane>

@@ -90,7 +90,7 @@ public class LoginController implements Initializable {
         Main.client.interrupt();
         System.out.println("zamykanie");
         stage.close();
-        System.exit(1);
+        System.exit(0);
     }
 
 

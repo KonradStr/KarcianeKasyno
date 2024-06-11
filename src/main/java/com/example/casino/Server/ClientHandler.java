@@ -3,6 +3,7 @@ package com.example.casino.Server;
 import com.example.casino.*;
 import com.example.casino.Packets.*;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,13 +12,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.example.casino.Server.GameServer.connection;
-import static com.example.casino.Server.GameServer.furas;
+import static com.example.casino.Server.GameServer.*;
 
 public class ClientHandler extends Thread {
     private Player player;
@@ -45,16 +47,24 @@ public class ClientHandler extends Thread {
         while (true) {
             try {
                 request = (Packet) in.readObject();
+                if (request == null) break;
+                parseRequest(request);
+
+            } catch (EOFException e) {
+                System.err.println("Klient zamknął połączenie: " + clientSocket.getInetAddress());
+                break;
+
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Nie udało się odczytac pakietu");
                 GameServer.removeNick(this.player.getPlayerData());
                 throw new RuntimeException(e);
             }
-
-            if (request == null) break;
-            parseRequest(request);
         }
 
+        stopConnection();
+    }
+
+    public void stopConnection() {
         try {
             in.close();
             out.close();
@@ -180,8 +190,16 @@ public class ClientHandler extends Thread {
                 JoinGamePacket.GameType gameType = joinRequest.getGameType();
                 JoinGamePacket.Status status = joinRequest.getStatus();
                 System.out.println(gameType);
+
+
                 if (gameType.equals(JoinGamePacket.GameType.POKER)) {
                     PokerGame game = GameServer.pokerGames.get(joinRequest.getUUID());
+
+                    if (game == null) {
+                        System.err.println("Gra z podaneym kodem nie istnieje: " + joinRequest.getUUID());
+                        break;
+                    }
+
                     if (status.equals(JoinGamePacket.Status.LEAVE)) {
                         System.out.println("user opuszcza lobby");
                         game.players.remove(this);
@@ -204,6 +222,12 @@ public class ClientHandler extends Thread {
                     }
                 } else {
                     RummyGame game = GameServer.rummyGames.get(joinRequest.getUUID());
+
+                    if (game == null) {
+                        System.err.println("Gra z podaneym kodem nie istnieje: " + joinRequest.getUUID());
+                        break;
+                    }
+
                     if (status.equals(JoinGamePacket.Status.LEAVE)) {
                         System.out.println("user opuszcza lobby");
                         game.players.remove(this);
@@ -279,7 +303,7 @@ public class ClientHandler extends Thread {
                 if (gamePacketStatus.equals(GamePacket.Status.MOVE)) {
                     System.out.println("odebrano pakiet move");
                     System.out.println("1.");
-                    switch (gamePacket.getMove_type()){
+                    switch (gamePacket.getMove_type()) {
                         case FOLD -> GameServer.pokerGames.get(UUID).handlerFold(this);
                         case CALL -> GameServer.pokerGames.get(UUID).handlerCall(this);
                         case RAISE -> GameServer.pokerGames.get(UUID).handlerRaise(this, 50);
@@ -289,6 +313,32 @@ public class ClientHandler extends Thread {
                 }
                 break;
 
+            }
+            case RANKING:{
+                RankingPacket rankingPacket  = (RankingPacket) request;
+                RankingPacket.Status rankingPacketStatus = rankingPacket.getStatus();
+                System.out.println("odrbrano pakiet ranking");
+                if(rankingPacketStatus.equals(RankingPacket.Status.POKER)){
+                    HashMap<Integer,Integer> pokerRankingMap = new HashMap<>();
+
+                    try {
+                        Statement st= connection.createStatement();
+                        ResultSet rs = st.executeQuery("SELECT UserID, Points FROM pokerRanking ORDER BY pokerRanking.Points DESC LIMIT 10");
+                        //ResultSet rs = st.executeQuery("SELECT UserID,UserID FROM users");
+
+                        while (rs.next()) {
+                            int userID = rs.getInt("UserID");
+                            int points = rs.getInt("Points");
+                            pokerRankingMap.put(userID, points);
+                        }
+
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    sendPacket(new RankingPacket("Switching to Poker Ranking", RankingPacket.Status.POKER, pokerRankingMap));
+                }
+
+                break;
             }
             default: {
                 System.err.println("NIEZNANY PAKIET");
