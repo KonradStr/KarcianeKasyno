@@ -294,7 +294,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
 //                    if (!otherCh.equals(ch)) {
 //                        otherCh.sendPacket(new GamePacket("other player move", GamePacket.Status.MOVE, ch.getPlayer()));
 //                    }
-/a/                }
+//                }
 //                lock.lock();
 //                while (!nextPlayer) {
 //                    next.await();
