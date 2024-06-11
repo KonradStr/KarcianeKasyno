@@ -88,7 +88,7 @@ public class ClientHandler extends Thread {
                             String password = rs.getString(2);
                             String salt = rs.getString(3);
                             System.out.println(password);
-                            if (PassHash.comparePasswd(password, salt, passw)) {
+                            if (PassHash.comparePasswd(passw, salt, password)) {
                                 player = new Player(userID, username, false);
                                 sendPacket(new LoginPacket("Logged In", player, LoginPacket.Status.LOGIN));
                             } else {

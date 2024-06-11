@@ -20,7 +20,9 @@ public class PassHash implements Callable<Pair<String, String>> {
 
     public static boolean comparePasswd(String psd, String salt, String hash)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
-
+//        System.out.println("psd: "+psd);
+//        System.out.println("slt: "+salt);
+//        System.out.println("hash: "+hash);
         byte[] slt = Base64.getDecoder().decode(salt);
         KeySpec spec = new PBEKeySpec(psd.toCharArray(), slt, 65536, 128);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
