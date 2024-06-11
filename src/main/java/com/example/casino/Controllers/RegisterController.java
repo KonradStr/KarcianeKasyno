@@ -14,7 +14,12 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 
 public class RegisterController implements Initializable {
 
@@ -40,19 +45,32 @@ public class RegisterController implements Initializable {
     private TextField usernameField;
 
     @FXML
-    private void register() {
+    private void register() throws NoSuchAlgorithmException, InvalidKeySpecException,
+            ExecutionException, InterruptedException {
         System.out.println("klienieto przycisk");
         String email = emailField.getText();
         String login = usernameField.getText();
-        String date = String.valueOf(birthDatePicker.getValue());
+        LocalDate dateTemp = birthDatePicker.getValue();
+
+
+        String date = String.valueOf(dateTemp);
+
         String password = passwordField.getText();
         System.out.println(email + login + date + password);
         if (login.isEmpty() || password.isEmpty() || email.isEmpty() || date.isEmpty()) {
             enableErr("NIE PODANO WSZYSTKICH DANYCH");
+        } else if (!isOver18(dateTemp)) {
+            enableErr("Musisz mieć co najmniej 18 lat!");
         } else {
             Packet p = new RegisterPacket("REGISTER TRY", email, login, password, date, RegisterPacket.Status.REGISTER);
             Main.client.sendPacket(p);
         }
+    }
+
+    private boolean isOver18(LocalDate birthDate) {
+        LocalDate today = LocalDate.now();
+        Period age = Period.between(birthDate, today);
+        return age.getYears() >= 18;
     }
 
     @FXML
@@ -71,7 +89,8 @@ public class RegisterController implements Initializable {
     }
 
     @FXML
-    void onEnter(ActionEvent event) {
+    void onEnter(ActionEvent event) throws NoSuchAlgorithmException,
+            InvalidKeySpecException, ExecutionException, InterruptedException {
         register();
     }
 
@@ -91,10 +110,15 @@ public class RegisterController implements Initializable {
     public void closeWindow() {
         Stage stage = (Stage) exit.getScene().getWindow();
         //stage.setIconified(true);
+        try {
+            Main.client.stopConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Main.client.interrupt();
         System.out.println("zamykanie");
         stage.close();
-        System.exit(1);
+        System.exit(0);
     }
 
 

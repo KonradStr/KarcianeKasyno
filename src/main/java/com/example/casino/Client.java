@@ -2,6 +2,7 @@ package com.example.casino;
 
 import com.example.casino.Controllers.*;
 import com.example.casino.Packets.*;
+import com.example.casino.Server.GameServer;
 import com.example.casino.Server.Karta;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +13,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -28,7 +31,7 @@ public class Client extends Thread {
     private MenuController mc;
     private RegisterController rc;
     private PokerTableController ptc;
-
+    private PokerRankingController prc;
 
     public void run() {
         try {
@@ -37,17 +40,27 @@ public class Client extends Thread {
             while (clientSocket.isConnected()) {
                 try {
                     respone = (Packet) in.readObject();
+                    if (respone == null) break;
+                    parseRespone(respone);
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
+                } catch (SocketException e) {
+                    System.err.println("Połączenie z serwerem zostało zamknięte.");
+                    break;
                 }
-                if (respone == null) break;
-                parseRespone(respone);
+
             }
             stopConnection();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void stopConnection() throws IOException {
+        in.close();
+        out.close();
+        clientSocket.close();
     }
 
     private void parseRespone(Packet respone) {
@@ -67,6 +80,7 @@ public class Client extends Thread {
                             openMenu()
                     );
                 } else if (status.equals(LoginPacket.Status.LOGOUT)) {
+                    GameServer.removeNick(loginRespone.getLogin()+"Client71");
                     System.out.println("Wylogowano");
                     Platform.runLater(() ->
                             logOut()
@@ -232,11 +246,41 @@ public class Client extends Thread {
                 }
                 break;
             }
+            case RANKING:{
+                RankingPacket rankingPacket = (RankingPacket) respone;
+                RankingPacket.Status status = rankingPacket.getStatus();
+                if (status.equals(RankingPacket.Status.POKER)) {
+                    Platform.runLater(() -> {
+                        goToPokerRanking(rankingPacket.getRankingMap());
+                    });
+                }
+
+                break;
+            }
             default: {
                 System.err.println("NIEZNANY PAKIET");
             }
         }
     }
+
+    private void goToPokerRanking(HashMap<Integer,Integer> RankingMap){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerRanking.fxml"));
+            Parent root = loader.load();
+            this.prc = loader.getController();
+            this.prc.setPokerRankingMap(RankingMap);
+            this.prc.initTop10List();
+            Main.stage.close();
+            Main.stage.setTitle("PokerRanking");
+            Main.stage.setScene(new Scene(root));
+            Main.stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("error switching to poker ranking ");
+        }
+    }
+
 
 
     private void logOut() {
@@ -427,13 +471,6 @@ public class Client extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-
-    public void stopConnection() throws IOException {
-        in.close();
-        out.close();
-        clientSocket.close();
     }
 
     public Client() {

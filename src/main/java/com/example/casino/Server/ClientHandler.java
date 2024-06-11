@@ -3,18 +3,23 @@ package com.example.casino.Server;
 import com.example.casino.*;
 import com.example.casino.Packets.*;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.example.casino.Server.GameServer.connection;
+import static com.example.casino.Server.GameServer.*;
 
 public class ClientHandler extends Thread {
     private Player player;
@@ -42,15 +47,24 @@ public class ClientHandler extends Thread {
         while (true) {
             try {
                 request = (Packet) in.readObject();
+                if (request == null) break;
+                parseRequest(request);
+
+            } catch (EOFException e) {
+                System.err.println("Klient zamknął połączenie: " + clientSocket.getInetAddress());
+                break;
+
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Nie udało się odczytac pakietu");
+                GameServer.removeNick(this.player.getPlayerData());
                 throw new RuntimeException(e);
             }
-
-            if (request == null) break;
-            parseRequest(request);
         }
 
+        stopConnection();
+    }
+
+    public void stopConnection() {
         try {
             in.close();
             out.close();
@@ -75,24 +89,30 @@ public class ClientHandler extends Thread {
                 LoginPacket.Status status = loginRequest.getStatus();
                 if (status.equals(LoginPacket.Status.LOGOUT)) {
                     sendPacket(new LoginPacket("Loging out", LoginPacket.Status.LOGOUT));
+                    GameServer.removeNick(this.player.getPlayerData());
                 } else {
                     try {
                         Statement st = connection.createStatement();
-                        ResultSet rs = st.executeQuery("select UserID, Password from users where Username='" + username + "'");
+                        ResultSet rs = st.executeQuery("select UserID, Password, Salt from users where Username='"
+                                + username + "'");
                         if (rs.next()) {
                             Integer userID = rs.getInt(1);
                             String password = rs.getString(2);
+                            String salt = rs.getString(3);
                             System.out.println(password);
-                            if (password.equals(passw)) {
+                            if (PassHash.comparePasswd(passw, salt, password) && GameServer.checkAvailability(username)) {
                                 player = new Player(userID, username, false);
+                                GameServer.addNick(username);
                                 sendPacket(new LoginPacket("Logged In", player, LoginPacket.Status.LOGIN));
+                                sendPacket(new LoginPacket("PasswordError", LoginPacket.Status.PASWWORD_ERROR));
                             } else {
                                 sendPacket(new LoginPacket("PasswordError", LoginPacket.Status.PASWWORD_ERROR));
                             }
                         } else {
-                            sendPacket(new LoginPacket("AccountNotFoundError", LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR));
+                            sendPacket(new LoginPacket("AccountNotFoundError",
+                                    LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR));
                         }
-                    } catch (SQLException e) {
+                    } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -105,21 +125,26 @@ public class ClientHandler extends Thread {
                 String email = registerRequest.getEmail();
                 String username = registerRequest.getLogin();
                 String date = registerRequest.getDate();
-                String passw = registerRequest.getPassword();
+                String passw = registerRequest.getPassword();   //zahashowane
+                String slt = registerRequest.getSalt();
                 System.out.println(data);
                 try {
                     Statement st = connection.createStatement();
                     ResultSet rs = st.executeQuery("select * from users where Email='" + email + "'");
+                    //TODO: ResultSet rs2 = st.executeQuery("select * from users where Username='" + username + "'");
 
                     if (rs.next()) {
-                        sendPacket(new RegisterPacket("Account already exists", RegisterPacket.Status.ACOUNT_ALREADY_EXISTS_ERROR));
+                        sendPacket(new RegisterPacket("Account already exists",
+                                RegisterPacket.Status.ACOUNT_ALREADY_EXISTS_ERROR));
                     } else {
-                        String sql = "INSERT INTO users (Username, Email, Password, DateOfBirth) VALUES (?,?,?,?)";
+                        String sql = "INSERT INTO users (Username, Email, Password, Salt, DateOfBirth) " +
+                                "VALUES (?,?,?,?,?)";
                         PreparedStatement preparedStatement = connection.prepareStatement(sql);
                         preparedStatement.setString(1, username);
                         preparedStatement.setString(2, email);
                         preparedStatement.setString(3, passw);
-                        preparedStatement.setString(4, date);
+                        preparedStatement.setString(4, slt);
+                        preparedStatement.setString(5, date);
                         preparedStatement.execute();
                         st = connection.createStatement();
                         rs = st.executeQuery("select userID from users where Username='" + username + "'");
@@ -127,6 +152,7 @@ public class ClientHandler extends Thread {
                             Integer userID = rs.getInt(1);
                             player = new Player(userID, username, false);
                             System.out.println("rejestracja jest spoko ok");
+                            GameServer.addNick(username);
                         }
                         sendPacket(new RegisterPacket("Registered", player, RegisterPacket.Status.REGISTER));
 
@@ -146,11 +172,13 @@ public class ClientHandler extends Thread {
                 if (gameType.equals(CreateGamePacket.GameType.POKER)) {
                     GameServer.pokerGames.put(UUID, new PokerGame(UUID, this));
                     System.out.println("Stworzono nową gre pokera: " + UUID);
-                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID, CreateGamePacket.GameType.POKER));
+                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID,
+                            CreateGamePacket.GameType.POKER));
                 } else {
                     GameServer.rummyGames.put(UUID, new RummyGame(UUID, this));
                     System.out.println("Stworzono nową gre remika: " + UUID);
-                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID, CreateGamePacket.GameType.RUMMY));
+                    sendPacket(new CreateGamePacket("GameCreated:" + UUID, UUID,
+                            CreateGamePacket.GameType.RUMMY));
                 }
                 break;
             }
@@ -162,8 +190,16 @@ public class ClientHandler extends Thread {
                 JoinGamePacket.GameType gameType = joinRequest.getGameType();
                 JoinGamePacket.Status status = joinRequest.getStatus();
                 System.out.println(gameType);
+
+
                 if (gameType.equals(JoinGamePacket.GameType.POKER)) {
                     PokerGame game = GameServer.pokerGames.get(joinRequest.getUUID());
+
+                    if (game == null) {
+                        System.err.println("Gra z podaneym kodem nie istnieje: " + joinRequest.getUUID());
+                        break;
+                    }
+
                     if (status.equals(JoinGamePacket.Status.LEAVE)) {
                         System.out.println("user opuszcza lobby");
                         game.players.remove(this);
@@ -171,17 +207,27 @@ public class ClientHandler extends Thread {
                         if (game.players.isEmpty()) {
                             GameServer.pokerGames.remove(joinRequest.getUUID());
                         } else {
-                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_LEFT));
+                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(),
+                                    JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_LEFT));
                         }
-                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEFT));
+                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEFT));
                     } else {
-                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
+                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
                         game.players.add(this);
                         game.playersData.add(this.player);
-                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(), JoinGamePacket.GameType.POKER, game.playersData, JoinGamePacket.Status.JOINED));
+                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.POKER, game.playersData, JoinGamePacket.Status.JOINED));
                     }
                 } else {
                     RummyGame game = GameServer.rummyGames.get(joinRequest.getUUID());
+
+                    if (game == null) {
+                        System.err.println("Gra z podaneym kodem nie istnieje: " + joinRequest.getUUID());
+                        break;
+                    }
+
                     if (status.equals(JoinGamePacket.Status.LEAVE)) {
                         System.out.println("user opuszcza lobby");
                         game.players.remove(this);
@@ -189,14 +235,18 @@ public class ClientHandler extends Thread {
                         if (game.players.isEmpty()) {
                             GameServer.rummyGames.remove(joinRequest.getUUID());
                         } else {
-                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_LEFT));
+                            game.broadcast(new JoinGamePacket("USERLEFT", joinRequest.getUUID(),
+                                    JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_LEFT));
                         }
-                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, JoinGamePacket.Status.LEFT));
+                        sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.RUMMY, JoinGamePacket.Status.LEFT));
                     } else {
-                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_JOIN));
+                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.RUMMY, this.player, JoinGamePacket.Status.USER_JOIN));
                         game.players.add(this);
                         game.playersData.add(this.player);
-                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(), JoinGamePacket.GameType.RUMMY, game.playersData, JoinGamePacket.Status.JOINED));
+                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(),
+                                JoinGamePacket.GameType.RUMMY, game.playersData, JoinGamePacket.Status.JOINED));
                     }
                 }
                 break;
@@ -211,20 +261,24 @@ public class ClientHandler extends Thread {
                     if (status.equals(GameReadyPacket.Status.READY)) {
                         System.out.println(++GameServer.pokerGames.get(uuid).playersReady);
                         player.setReady(true);
-                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType, player, uuid, GameReadyPacket.Status.READY));
+                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType,
+                                player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.pokerGames.get(uuid).playersReady == 2) {
-                            GameServer.executorService.submit(GameServer.pokerGames.get(uuid));
+
+                            furas.add(GameServer.executorService.submit(GameServer.pokerGames.get(uuid)));
                         }
                     } else {
                         GameServer.pokerGames.get(uuid).playersReady--;
                         player.setReady(false);
-                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType, player, uuid, GameReadyPacket.Status.NOT_READY));
+                        GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType,
+                                player, uuid, GameReadyPacket.Status.NOT_READY));
                     }
                 } else {
                     if (status.equals(GameReadyPacket.Status.READY)) {
                         System.out.println(++GameServer.rummyGames.get(uuid).playersReady);
                         player.setReady(true);
-                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType, player, uuid, GameReadyPacket.Status.READY));
+                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType,
+                                player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.rummyGames.get(uuid).playersReady == 2) {
                             Future<Player> future = GameServer.executorService.submit(GameServer.rummyGames.get(uuid));
                             try {
@@ -236,7 +290,8 @@ public class ClientHandler extends Thread {
                     } else {
                         GameServer.rummyGames.get(uuid).playersReady--;
                         player.setReady(false);
-                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType, player, uuid, GameReadyPacket.Status.NOT_READY));
+                        GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("notready", gameType,
+                                player, uuid, GameReadyPacket.Status.NOT_READY));
                     }
                 }
                 break;
@@ -248,7 +303,7 @@ public class ClientHandler extends Thread {
                 if (gamePacketStatus.equals(GamePacket.Status.MOVE)) {
                     System.out.println("odebrano pakiet move");
                     System.out.println("1.");
-                    switch (gamePacket.getMove_type()){
+                    switch (gamePacket.getMove_type()) {
                         case FOLD -> GameServer.pokerGames.get(UUID).handlerFold(this);
                         case CALL -> GameServer.pokerGames.get(UUID).handlerCall(this);
                         case RAISE -> GameServer.pokerGames.get(UUID).handlerRaise(this, 50);
@@ -258,6 +313,32 @@ public class ClientHandler extends Thread {
                 }
                 break;
 
+            }
+            case RANKING:{
+                RankingPacket rankingPacket  = (RankingPacket) request;
+                RankingPacket.Status rankingPacketStatus = rankingPacket.getStatus();
+                System.out.println("odrbrano pakiet ranking");
+                if(rankingPacketStatus.equals(RankingPacket.Status.POKER)){
+                    HashMap<Integer,Integer> pokerRankingMap = new HashMap<>();
+
+                    try {
+                        Statement st= connection.createStatement();
+                        ResultSet rs = st.executeQuery("SELECT UserID, Points FROM pokerRanking ORDER BY pokerRanking.Points DESC LIMIT 10");
+                        //ResultSet rs = st.executeQuery("SELECT UserID,UserID FROM users");
+
+                        while (rs.next()) {
+                            int userID = rs.getInt("UserID");
+                            int points = rs.getInt("Points");
+                            pokerRankingMap.put(userID, points);
+                        }
+
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    sendPacket(new RankingPacket("Switching to Poker Ranking", RankingPacket.Status.POKER, pokerRankingMap));
+                }
+
+                break;
             }
             default: {
                 System.err.println("NIEZNANY PAKIET");

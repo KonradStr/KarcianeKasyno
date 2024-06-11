@@ -26,6 +26,9 @@ public class MenuController {
     private Button LogoutButton;
 
     @FXML
+    private Button goToPokerRankingButton, goToRemikRankingButton;
+
+    @FXML
     private TextField gameID;
 
     @FXML
@@ -75,6 +78,16 @@ public class MenuController {
     }
 
     @FXML
+    public void goToPokerRanking(){
+        Main.client.sendPacket(new RankingPacket("Switching to Poker Ranking", RankingPacket.Status.POKER));
+    }
+
+    @FXML
+    public void goToRemikRanking(){
+
+    }
+
+    @FXML
     public void closeWindow() {
         Stage stage = (Stage) exit.getScene().getWindow();
         //stage.setIconified(true);
@@ -86,9 +99,8 @@ public class MenuController {
         Main.client.interrupt();
         System.out.println("zamykanie");
         stage.close();
-        System.exit(1);
+        System.exit(0);
     }
-
 
     @FXML
     public void minimizeWindow() {
