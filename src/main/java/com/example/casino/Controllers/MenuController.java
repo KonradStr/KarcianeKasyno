@@ -84,6 +84,7 @@ public class MenuController {
 
     @FXML
     public void goToRemikRanking(){
+        Main.client.sendPacket(new RankingPacket("Switching to Remik Ranking", RankingPacket.Status.REMIK));
 
     }
 

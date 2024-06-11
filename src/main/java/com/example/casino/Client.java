@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Menu;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,6 +33,7 @@ public class Client extends Thread {
     private RegisterController rc;
     private PokerTableController ptc;
     private PokerRankingController prc;
+    private RemikRankingController rrc;
 
     public void run() {
         try {
@@ -253,6 +255,10 @@ public class Client extends Thread {
                     Platform.runLater(() -> {
                         goToPokerRanking(rankingPacket.getRankingMap());
                     });
+                } else if (status.equals(RankingPacket.Status.REMIK)) {
+                    Platform.runLater(() -> {
+                        goToRemikRanking(rankingPacket.getRankingMap());
+                    });
                 }
 
                 break;
@@ -263,7 +269,7 @@ public class Client extends Thread {
         }
     }
 
-    private void goToPokerRanking(HashMap<Integer,Integer> RankingMap){
+    private void goToPokerRanking(HashMap<String,Integer> RankingMap){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerRanking.fxml"));
             Parent root = loader.load();
@@ -278,6 +284,24 @@ public class Client extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("error switching to poker ranking ");
+        }
+    }
+
+    private void goToRemikRanking(HashMap<String,Integer> RankingMap){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("RemikRanking.fxml"));
+            Parent root = loader.load();
+            this.rrc = loader.getController();
+            this.rrc.setRemikRankingMap(RankingMap);
+            this.rrc.initTop10List();
+            Main.stage.close();
+            Main.stage.setTitle("RemikRanking");
+            Main.stage.setScene(new Scene(root));
+            Main.stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("error switching to remik ranking ");
         }
     }
 
@@ -485,6 +509,10 @@ public class Client extends Thread {
 
     public void setLoginController(LoginController lc) {
         this.lc = lc;
+    }
+
+    public void setMenuController(MenuController mc){
+        this.mc = mc;
     }
 
     public void setRegisterController(RegisterController rc) {

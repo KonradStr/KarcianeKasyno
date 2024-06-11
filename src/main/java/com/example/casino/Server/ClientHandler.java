@@ -319,23 +319,39 @@ public class ClientHandler extends Thread {
                 RankingPacket.Status rankingPacketStatus = rankingPacket.getStatus();
                 System.out.println("odrbrano pakiet ranking");
                 if(rankingPacketStatus.equals(RankingPacket.Status.POKER)){
-                    HashMap<Integer,Integer> pokerRankingMap = new HashMap<>();
+                    HashMap<String,Integer> pokerRankingMap = new HashMap<>();
 
                     try {
                         Statement st= connection.createStatement();
-                        ResultSet rs = st.executeQuery("SELECT UserID, Points FROM pokerRanking ORDER BY pokerRanking.Points DESC LIMIT 10");
-                        //ResultSet rs = st.executeQuery("SELECT UserID,UserID FROM users");
+                        ResultSet rs = st.executeQuery("SELECT users.username, pokerRanking.Points FROM pokerRanking JOIN users USING(UserID) ORDER BY pokerRanking.Points DESC LIMIT 10");
 
                         while (rs.next()) {
-                            int userID = rs.getInt("UserID");
+                            String username = rs.getString("Username");
                             int points = rs.getInt("Points");
-                            pokerRankingMap.put(userID, points);
+                            pokerRankingMap.put(username, points);
                         }
 
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
                     sendPacket(new RankingPacket("Switching to Poker Ranking", RankingPacket.Status.POKER, pokerRankingMap));
+                } else if (rankingPacketStatus.equals(RankingPacket.Status.REMIK)) {
+                    HashMap<String,Integer> remikRankingMap = new HashMap<>();
+
+                    try {
+                        Statement st= connection.createStatement();
+                        ResultSet rs = st.executeQuery("SELECT users.username, pokerRanking.Points FROM pokerRanking JOIN users USING(UserID) ORDER BY pokerRanking.Points DESC LIMIT 10"); //do zmiany na remik
+
+                        while (rs.next()) {
+                            String username = rs.getString("Username");
+                            int points = rs.getInt("Points");
+                            remikRankingMap.put(username, points);
+                        }
+
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    sendPacket(new RankingPacket("Switching to Remik Ranking", RankingPacket.Status.REMIK, remikRankingMap));
                 }
 
                 break;

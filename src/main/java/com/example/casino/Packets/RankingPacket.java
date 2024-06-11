@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class RankingPacket extends Packet{
     private Status status;
-    private HashMap<Integer, Integer> rankingMap;
+    private HashMap<String, Integer> rankingMap;
 
     public enum Status {
         POKER,
@@ -16,7 +16,7 @@ public class RankingPacket extends Packet{
         this.status = status;
     }
 
-    public RankingPacket(String data, Status status, HashMap<Integer,Integer> rankingMap) {
+    public RankingPacket(String data, Status status, HashMap<String,Integer> rankingMap) {
         super(PacketType.RANKING, data);
         this.status = status;
         this.rankingMap = rankingMap;
@@ -31,7 +31,7 @@ public class RankingPacket extends Packet{
         return status;
     }
 
-    public HashMap<Integer, Integer> getRankingMap() {
+    public HashMap<String, Integer> getRankingMap() {
         return rankingMap;
     }
 }
