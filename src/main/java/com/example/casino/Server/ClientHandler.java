@@ -47,6 +47,7 @@ public class ClientHandler extends Thread {
                 request = (Packet) in.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Nie udało się odczytac pakietu");
+                GameServer.removeNick(this.player.getPlayerData());
                 throw new RuntimeException(e);
             }
 
@@ -59,9 +60,6 @@ public class ClientHandler extends Thread {
             out.close();
             clientSocket.close();
         } catch (IOException e) {
-            System.out.println("pre: "+GameServer.getNicknames());
-            GameServer.removeNick(this.player.getPlayerData());
-            System.out.println("post: "+GameServer.getNicknames());
             throw new RuntimeException(e);
         }
     }
@@ -81,7 +79,7 @@ public class ClientHandler extends Thread {
                 LoginPacket.Status status = loginRequest.getStatus();
                 if (status.equals(LoginPacket.Status.LOGOUT)) {
                     sendPacket(new LoginPacket("Loging out", LoginPacket.Status.LOGOUT));
-                    GameServer.removeNick(username);
+                    GameServer.removeNick(this.player.getPlayerData());
                 } else {
                     try {
                         Statement st = connection.createStatement();

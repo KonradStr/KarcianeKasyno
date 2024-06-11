@@ -38,11 +38,14 @@ public class GameServer {
     public static ArrayList<String> getNicknames(){ return nicknames;}
 
     public static void addNick(String nick){
-        nicknames.add(nick);
+        if(!nicknames.contains(nick))
+            nicknames.add(nick);
+        System.out.println("add: "+nicknames);
     }
 
     public static void removeNick(String nick){
         nicknames.remove(nick);
+        System.out.println(nick + "remove: "+nicknames);
     }
 
     public void start(int port) throws IOException {

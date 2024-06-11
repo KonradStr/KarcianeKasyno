@@ -68,7 +68,7 @@ public class Client extends Thread {
                             openMenu()
                     );
                 } else if (status.equals(LoginPacket.Status.LOGOUT)) {
-                    GameServer.removeNick(loginRespone.getLogin());
+                    GameServer.removeNick(loginRespone.getLogin()+"Client71");
                     System.out.println("Wylogowano");
                     Platform.runLater(() ->
                             logOut()
