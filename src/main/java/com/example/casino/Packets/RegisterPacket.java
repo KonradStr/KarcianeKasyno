@@ -7,9 +7,7 @@ import javafx.util.Pair;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 public class RegisterPacket extends Packet {
 
@@ -17,7 +15,12 @@ public class RegisterPacket extends Packet {
     private String date;
     private String login;
     private String password;
+    private String salt;
     private Player player;
+
+    public String getSalt() {
+        return salt;
+    }
 
 
     public enum Status {
@@ -33,10 +36,11 @@ public class RegisterPacket extends Packet {
         this.email = email;
         this.date = date;
         this.login = login;
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         FutureTask<Pair<String, String>> future = (FutureTask<Pair<String, String>>)
-                GameServer.executorService.submit(new PassHash(password));
+                executorService.submit(new PassHash(password));
         this.password = future.get().getKey();
-        //TODO this.salt = future.get.getValue();
+        this.salt = future.get().getValue();
         this.status = status;
     }
 

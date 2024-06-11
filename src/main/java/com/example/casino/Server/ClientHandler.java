@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -79,13 +81,14 @@ public class ClientHandler extends Thread {
                 } else {
                     try {
                         Statement st = connection.createStatement();
-                        ResultSet rs = st.executeQuery("select UserID, Password from users where Username='"
+                        ResultSet rs = st.executeQuery("select UserID, Password, Salt from users where Username='"
                                 + username + "'");
                         if (rs.next()) {
                             Integer userID = rs.getInt(1);
                             String password = rs.getString(2);
+                            String salt = rs.getString(3);
                             System.out.println(password);
-                            if (password.equals(passw)) {
+                            if (PassHash.comparePasswd(password, salt, passw)) {
                                 player = new Player(userID, username, false);
                                 sendPacket(new LoginPacket("Logged In", player, LoginPacket.Status.LOGIN));
                             } else {
@@ -96,6 +99,10 @@ public class ClientHandler extends Thread {
                                     LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR));
                         }
                     } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new RuntimeException(e);
+                    } catch (InvalidKeySpecException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -108,7 +115,8 @@ public class ClientHandler extends Thread {
                 String email = registerRequest.getEmail();
                 String username = registerRequest.getLogin();
                 String date = registerRequest.getDate();
-                String passw = registerRequest.getPassword();
+                String passw = registerRequest.getPassword();   //zahashowane
+                String slt = registerRequest.getSalt();
                 System.out.println(data);
                 try {
                     Statement st = connection.createStatement();
@@ -118,12 +126,14 @@ public class ClientHandler extends Thread {
                         sendPacket(new RegisterPacket("Account already exists",
                                 RegisterPacket.Status.ACOUNT_ALREADY_EXISTS_ERROR));
                     } else {
-                        String sql = "INSERT INTO users (Username, Email, Password, DateOfBirth) VALUES (?,?,?,?)";
+                        String sql = "INSERT INTO users (Username, Email, Password, Salt, DateOfBirth) " +
+                                "VALUES (?,?,?,?,?)";
                         PreparedStatement preparedStatement = connection.prepareStatement(sql);
                         preparedStatement.setString(1, username);
                         preparedStatement.setString(2, email);
                         preparedStatement.setString(3, passw);
-                        preparedStatement.setString(4, date);
+                        preparedStatement.setString(4, slt);
+                        preparedStatement.setString(5, date);
                         preparedStatement.execute();
                         st = connection.createStatement();
                         rs = st.executeQuery("select userID from users where Username='" + username + "'");
