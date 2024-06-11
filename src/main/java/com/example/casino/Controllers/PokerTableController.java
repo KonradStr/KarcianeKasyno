@@ -112,6 +112,8 @@ public class PokerTableController implements Initializable {
 
     @FXML
     public void callFunc(){
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid));
+        yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - currentBid));
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
         disableButtonCall();
         disableButtonFold();
@@ -141,6 +143,8 @@ public class PokerTableController implements Initializable {
 
     @FXML
     public void raiseFunc(){
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid + 50));
+        yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - (currentBid + 50)));
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.RAISE));
         disableButtonCall();
         disableButtonFold();
@@ -176,9 +180,7 @@ public class PokerTableController implements Initializable {
 
     public void assignPlayers(List<Player> plyerList){
         // TODO : popraw to prosze
-        System.out.println("Liczba pozostałych graczy: " + plyerList.size());
         Player player1 = plyerList.get(0);
-        System.out.println("kaska gracza drugego " + player1.getMoney());
         PlayerFields playerFields = new PlayerFields(player1Money, player1Username, player1Card1, player1Card2);
         playerFields.setPlayer(player1, true);
         playersFields.put(player1, playerFields);
@@ -189,10 +191,14 @@ public class PokerTableController implements Initializable {
         playersFields.put(player2, playerFields);
         if (plyerList.size() == 2) return;
         Player player3 = plyerList.get(2);
-        setThirdPlayer(player3, true);
+        playerFields = new PlayerFields(player3Money, player3Username, player3Card1, player3Card2);
+        playerFields.setPlayer(player3, true);
+        playersFields.put(player3, playerFields);
         if (plyerList.size() == 3) return;
         Player player4 = plyerList.get(3);
-        setFourthPlayer(player4, true);
+        playerFields = new PlayerFields(player4Money, player4Username, player4Card1, player4Card2);
+        playerFields.setPlayer(player4, true);
+        playersFields.put(player4, playerFields);
     }
 
     private void setFirstPlayer(Player player, boolean back) {
@@ -262,6 +268,7 @@ public class PokerTableController implements Initializable {
     public void smallBlind(){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 5));
+        currentBid = 5;
     }
     public void otherSmallBlind(Player player){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
@@ -275,6 +282,7 @@ public class PokerTableController implements Initializable {
     public void bigBlind(){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 10));
+        currentBid = 10;
     }
 
     public void setTableCard(Integer cardIndex, Karta card){
@@ -307,6 +315,7 @@ public class PokerTableController implements Initializable {
 
     public void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid){
         this.currentBid = currentBid;
+        System.out.println("currnetBid: " + currentBid);
         if (moveType.equals(GamePacket.MOVE_TYPE.CHECK)) {
             enableButtonFold();
             enableButtonRaise();
@@ -323,8 +332,9 @@ public class PokerTableController implements Initializable {
             showButtonCall();
         }
     }
-    public void otherMakeMove(){
-        System.out.println("ktos robi ruchy");
+    public void otherMakeMove(Player player, GamePacket.MOVE_TYPE moveType, Integer money){
+        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + (Integer.valueOf(playersFields.get(player).getMoney()) - money)));
+        playersFields.get(player).setMoney(String.valueOf(money));
     }
 
     @Override

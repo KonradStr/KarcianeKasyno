@@ -57,6 +57,14 @@ public class GamePacket extends Packet {
         this.move_type = move_type;
     }
 
+    public GamePacket(String data, Status status, MOVE_TYPE move_type, Player player, Integer currentBid) {
+        super(PacketType.GAME, data);
+        this.status = status;
+        this.move_type = move_type;
+        this.player = player;
+        this.currentBid = currentBid;
+    }
+
     public GamePacket(String data, Status status, MOVE_TYPE move_type, Integer currentBid) {
         super(PacketType.GAME, data);
         this.status = status;

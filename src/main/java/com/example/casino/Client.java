@@ -166,6 +166,7 @@ public class Client extends Thread {
             case GAME: {
                 GamePacket gamePacket = (GamePacket) respone;
                 GamePacket.Status status = gamePacket.getStatus();
+                System.out.println("przyjeto pakiet" + gamePacket.getStatus());
                 if (status.equals(GamePacket.Status.START)) {
                     Platform.runLater(() -> {
                         startGame(gamePacket.getPlayers(), gamePacket.getPlayer().getPlayerData());
@@ -206,7 +207,8 @@ public class Client extends Thread {
                 } else if (status.equals(GamePacket.Status.MOVE)) {
                     if (gamePacket.getPlayer() != null) {
                         Platform.runLater(() ->
-                                otherMakeMove(gamePacket.getPlayer())
+                                otherMakeMove(gamePacket.getPlayer(), gamePacket.getMove_type(), gamePacket.getCurrentBid())
+                                //tutaj w getcurrentbid jest liczba na jaka ma usatwic sie wartoc gracza
                         );
                     } else {
                         Platform.runLater(() ->
@@ -405,8 +407,8 @@ public class Client extends Thread {
         this.ptc.makeMove(moveType, currentBid);
     }
 
-    private void otherMakeMove(Player player) {
-        this.ptc.otherMakeMove();
+    private void otherMakeMove(Player player, GamePacket.MOVE_TYPE moveType, Integer money) {
+        this.ptc.otherMakeMove(player, moveType, money);
     }
 
 

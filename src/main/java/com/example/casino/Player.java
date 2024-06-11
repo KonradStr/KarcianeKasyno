@@ -29,6 +29,7 @@ public class Player implements Serializable {
         this.isReady = isReady;
         this.money = 1000;
         this.pokerHand = new PokerHand();
+        this.curBid = 0;
     }
 
     public void clearHand() {
