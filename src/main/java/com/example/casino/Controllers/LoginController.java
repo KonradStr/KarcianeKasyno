@@ -3,6 +3,7 @@ package com.example.casino.Controllers;
 import com.example.casino.Main;
 import com.example.casino.Packets.LoginPacket;
 import com.example.casino.Packets.Packet;
+import com.example.casino.Server.GameServer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;

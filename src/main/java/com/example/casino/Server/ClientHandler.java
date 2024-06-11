@@ -59,6 +59,9 @@ public class ClientHandler extends Thread {
             out.close();
             clientSocket.close();
         } catch (IOException e) {
+            System.out.println("pre: "+GameServer.getNicknames());
+            GameServer.removeNick(this.player.getPlayerData());
+            System.out.println("post: "+GameServer.getNicknames());
             throw new RuntimeException(e);
         }
     }
@@ -78,6 +81,7 @@ public class ClientHandler extends Thread {
                 LoginPacket.Status status = loginRequest.getStatus();
                 if (status.equals(LoginPacket.Status.LOGOUT)) {
                     sendPacket(new LoginPacket("Loging out", LoginPacket.Status.LOGOUT));
+                    GameServer.removeNick(username);
                 } else {
                     try {
                         Statement st = connection.createStatement();
@@ -88,9 +92,11 @@ public class ClientHandler extends Thread {
                             String password = rs.getString(2);
                             String salt = rs.getString(3);
                             System.out.println(password);
-                            if (PassHash.comparePasswd(passw, salt, password)) {
+                            if (PassHash.comparePasswd(passw, salt, password) && GameServer.checkAvailability(username)) {
                                 player = new Player(userID, username, false);
+                                GameServer.addNick(username);
                                 sendPacket(new LoginPacket("Logged In", player, LoginPacket.Status.LOGIN));
+                                sendPacket(new LoginPacket("PasswordError", LoginPacket.Status.PASWWORD_ERROR));
                             } else {
                                 sendPacket(new LoginPacket("PasswordError", LoginPacket.Status.PASWWORD_ERROR));
                             }
@@ -98,11 +104,7 @@ public class ClientHandler extends Thread {
                             sendPacket(new LoginPacket("AccountNotFoundError",
                                     LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR));
                         }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    } catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException(e);
-                    } catch (InvalidKeySpecException e) {
+                    } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -121,6 +123,7 @@ public class ClientHandler extends Thread {
                 try {
                     Statement st = connection.createStatement();
                     ResultSet rs = st.executeQuery("select * from users where Email='" + email + "'");
+                    //TODO: ResultSet rs2 = st.executeQuery("select * from users where Username='" + username + "'");
 
                     if (rs.next()) {
                         sendPacket(new RegisterPacket("Account already exists",
@@ -141,6 +144,7 @@ public class ClientHandler extends Thread {
                             Integer userID = rs.getInt(1);
                             player = new Player(userID, username, false);
                             System.out.println("rejestracja jest spoko ok");
+                            GameServer.addNick(username);
                         }
                         sendPacket(new RegisterPacket("Registered", player, RegisterPacket.Status.REGISTER));
 

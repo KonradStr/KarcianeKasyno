@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -28,10 +29,21 @@ public class GameServer {
 
     public static Map<String, PokerGame> pokerGames = new HashMap<>();
     public static Map<String, RummyGame> rummyGames = new HashMap<>();
-
+    private static ArrayList<String> nicknames = new ArrayList<>();
     public static ExecutorService executorService;
+    public static ArrayList<ClientHandler> handlers = new ArrayList<>();
     public static ArrayList<Future<ArrayList<ClientHandler>>> furas;
 
+    public static boolean checkAvailability(String nick){ return !nicknames.contains(nick); }
+    public static ArrayList<String> getNicknames(){ return nicknames;}
+
+    public static void addNick(String nick){
+        nicknames.add(nick);
+    }
+
+    public static void removeNick(String nick){
+        nicknames.remove(nick);
+    }
 
     public void start(int port) throws IOException {
         executorService = Executors.newFixedThreadPool(100);
@@ -40,7 +52,8 @@ public class GameServer {
         System.out.println("ADRES IP SERWERA: " + serverSocket.getInetAddress());
         System.out.println("PORT: " + serverSocket.getLocalPort());
         while (true) {
-            new ClientHandler(serverSocket.accept()).start();
+            handlers.add(new ClientHandler(serverSocket.accept()));
+            handlers.getLast().start();
         }
     }
 

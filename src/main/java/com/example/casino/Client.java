@@ -2,6 +2,7 @@ package com.example.casino;
 
 import com.example.casino.Controllers.*;
 import com.example.casino.Packets.*;
+import com.example.casino.Server.GameServer;
 import com.example.casino.Server.Karta;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -67,6 +68,7 @@ public class Client extends Thread {
                             openMenu()
                     );
                 } else if (status.equals(LoginPacket.Status.LOGOUT)) {
+                    GameServer.removeNick(loginRespone.getLogin());
                     System.out.println("Wylogowano");
                     Platform.runLater(() ->
                             logOut()
