@@ -185,7 +185,7 @@ public class Client extends Thread {
                 System.out.println("przyjeto pakiet" + gamePacket.getStatus());
                 if (status.equals(GamePacket.Status.START)) {
                     Platform.runLater(() -> {
-                        startGame(gamePacket.getPlayers(), gamePacket.getPlayer().getPlayerData());
+                        startGame(gamePacket.getPlayers(), gamePacket.getPlayer());
                     });
                 } else if (status.equals(GamePacket.Status.FIRST_HAND_CARD)) {
                     Platform.runLater(() ->
@@ -426,12 +426,12 @@ public class Client extends Thread {
         }
     }
 
-    private void startGame(List<Player> players, String username) {
+    private void startGame(List<Player> players, Player player) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerTable.fxml"));
             Parent root = loader.load();
             this.ptc = loader.getController();
-            this.ptc.setYourData(username);
+            this.ptc.setYourData(player.getPlayerData(), player.money);
             this.ptc.assignPlayers(players);
             Main.stage.close();
             Main.stage.setScene(new Scene(root));

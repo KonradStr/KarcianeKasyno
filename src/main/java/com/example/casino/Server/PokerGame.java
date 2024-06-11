@@ -26,6 +26,8 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     final Condition next = lock.newCondition();
     Integer currentBid;
     Integer moneyPool;
+
+    List<ClientHandler> recentWinners = new ArrayList<>();
     public void handlerRaiseBetween(ClientHandler ch, Integer r) {
         if (ch.getPlayer().curBid < currentBid) {
             ch.getPlayer().money -= (currentBid - ch.getPlayer().curBid);
@@ -77,7 +79,6 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     }
 
     public void updateMoneyPool() {
-        moneyPool = 0;
         for (Player p : playersData) {
             moneyPool += p.curBid;
         }
@@ -113,6 +114,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
                 ret.add(ch);
 
         }
+        System.out.println(ret);
         return ret;
     }
 
@@ -151,12 +153,21 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     }
 
 
-    private void deal() throws InterruptedException {
+    private void deal(boolean isFirstRound) throws InterruptedException {
         this.tableCards = new ArrayList<>();
         talia = new Talia(false);
         talia.SzuflujTalie();
-
         List<Player> otherPlayers = new ArrayList<>();
+
+        for (ClientHandler ch : players) {
+            ch.getPlayer().passedAway = false;
+            ch.getPlayer().clearHand();
+            if (isFirstRound) {
+                moneyPool = 0;
+                ch.getPlayer().setMoney(1000);
+            }
+        }
+
         for (int i = 0; i < players.size(); i++) {
             otherPlayers.clear();
             ClientHandler ch = players.get(i);
@@ -177,11 +188,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
                     GamePacket.Status.START, ch.getPlayer(), otherPlayers));
         }
 
-        for (ClientHandler ch : players) {
-            ch.getPlayer().passedAway = false;
-            ch.getPlayer().clearHand();
-            ch.getPlayer().setMoney(1000);
-        }
+
 
         for (ClientHandler ch : players) {
             Karta card = talia.KartaZTalii();
@@ -209,117 +216,88 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     @Override
     public ArrayList<ClientHandler> call() throws Exception { //rozdanie
 
-        deal();
+        for (int round = 0; round < 5; round++) {
+            deal(round==0);
+            Thread.sleep(1000);
+            handlerRaiseBetween(players.get(0), 5);
+            players.get(0).sendPacket(new GamePacket("small blind",
+                    GamePacket.Status.SMALL_BLIND
+                    , moneyPool));
 
-        Thread.sleep(1000);
-        handlerRaiseBetween(players.get(0), 5);
-        players.get(0).sendPacket(new GamePacket("small blind",
-                GamePacket.Status.SMALL_BLIND
-                , moneyPool));
-
-        for (ClientHandler ch : players) {
-            if (!ch.equals(players.get(0))) {
-                ch.sendPacket(new GamePacket("someone put small blind",
-                        GamePacket.Status.SMALL_BLIND, players.get(0).getPlayer()));
+            for (ClientHandler ch : players) {
+                if (!ch.equals(players.get(0))) {
+                    ch.sendPacket(new GamePacket("someone put small blind",
+                            GamePacket.Status.SMALL_BLIND, players.get(0).getPlayer()));
+                }
             }
-        }
-        Thread.sleep(2000);
-        handlerRaiseBetween(players.get(1), 5);
-        players.get(1).sendPacket(new GamePacket("big blind",
-                GamePacket.Status.BIG_BLIND, moneyPool));
-        for (ClientHandler ch : players) {
-            if (!ch.equals(players.get(1))) {
-                ch.sendPacket(new GamePacket("someone put big blind",
-                        GamePacket.Status.BIG_BLIND, players.get(1).getPlayer()));
+            Thread.sleep(2000);
+            handlerRaiseBetween(players.get(1), 5);
+            players.get(1).sendPacket(new GamePacket("big blind",
+                    GamePacket.Status.BIG_BLIND, moneyPool));
+            for (ClientHandler ch : players) {
+                if (!ch.equals(players.get(1))) {
+                    ch.sendPacket(new GamePacket("someone put big blind",
+                            GamePacket.Status.BIG_BLIND, players.get(1).getPlayer()));
+                }
             }
-        }
-        for (int i = 2; i < playersData.size(); i++) {
-            players.get(i).sendPacket(new GamePacket("your move",
-                    GamePacket.Status.MOVE,
-                    GamePacket.MOVE_TYPE.CALL, currentBid));
+            for (int i = 2; i < playersData.size(); i++) {
+                players.get(i).sendPacket(new GamePacket("your move",
+                        GamePacket.Status.MOVE,
+                        GamePacket.MOVE_TYPE.CALL, currentBid));
 
+                lock.lock();
+                while (!nextPlayer) {
+                    next.await();
+                }
+                lock.unlock();
+                nextPlayer = false;
+            }
+            players.get(0).sendPacket(new GamePacket("your move",
+                    GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, (currentBid - 5)));
             lock.lock();
             while (!nextPlayer) {
                 next.await();
             }
             lock.unlock();
             nextPlayer = false;
-        }
-        players.get(0).sendPacket(new GamePacket("your move",
-                GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, (currentBid - 5)));
-        lock.lock();
-        while (!nextPlayer) {
-            next.await();
-        }
-        lock.unlock();
-        nextPlayer = false;
-        turn(false);
-        for (int i = 1; i <= 3; i++) {
-            broadcast(new GamePacket("środkowe karta:",
-                    GamePacket.Status.TABLE_CARDS, i, tableCards.get(i - 1)));
-            Thread.sleep(1500);
-        }
-        currentBid = 0;
-        turn(true);
-        int temp = players.size();
-        for (ClientHandler ch : players) {
-            if (ch.getPlayer().passedAway) temp--;
-        }
-        if (temp <= 1) return Showdown();
-        broadcast(new GamePacket("środkowe karta:",
-                GamePacket.Status.TABLE_CARDS, 4, tableCards.get(3)));
-        Thread.sleep(1500);
-        currentBid = 0;
-        turn(true);
-        temp = players.size();
-        for (ClientHandler ch : players) {
-            if (ch.getPlayer().passedAway) temp--;
-        }
-        if (temp <= 1) return Showdown();
-        broadcast(new GamePacket("środkowe karta:",
-                GamePacket.Status.TABLE_CARDS, 5, tableCards.get(4)));
-        Thread.sleep(1500);
-        currentBid = 0;
-        turn(true);
-
-
-//
-//        for (int i = 0; i < 3; i++){
-//            System.out.println("runda :" + i+1);
-//            for (ClientHandler ch : players){
-//                System.out.println(ch.getPlayer().getPlayerData());
-//
-//                ch.sendPacket(new GamePacket("your move", GamePacket.Status.MOVE));
-//                for (ClientHandler otherCh : players) {
-//                    if (!otherCh.equals(ch)) {
-//                        otherCh.sendPacket(new GamePacket("other player move", GamePacket.Status.MOVE, ch.getPlayer()));
-//                    }
-//                }
-//                lock.lock();
-//                while (!nextPlayer) {
-//                    next.await();
-//                }
-//                lock.unlock();
-//                nextPlayer = false;
-//            }
-//            System.out.println("dalsze działanie");
-//            if (i == 2) break;
-//            broadcast(new GamePacket("środkowe karta:", GamePacket.Status.TABLE_CARDS, i + 4, tableCards.get(i+3)));
-//            Thread.sleep(1500);
-//        }
-        /*
-        for (ClientHandler ch : players) {
-            System.out.println(ch.getPlayer().getPlayerData());
-            synchronized (monitorObj) {
-                ch.sendPacket(new GamePacket("twój ruch", GamePacket.Status.MOVE));
-                System.out.println("wysłano");
-                monitorObj.wait();
+            turn(false);
+            for (int i = 1; i <= 3; i++) {
+                broadcast(new GamePacket("środkowe karta:",
+                        GamePacket.Status.TABLE_CARDS, i, tableCards.get(i - 1)));
+                Thread.sleep(1500);
             }
-            System.out.println("next iteration");
+            currentBid = 0;
+            turn(true);
+            int temp = players.size();
+            for (ClientHandler ch : players) {
+                if (ch.getPlayer().passedAway) temp--;
+            }
+            if (temp <= 1) continue;
+            broadcast(new GamePacket("środkowe karta:",
+                    GamePacket.Status.TABLE_CARDS, 4, tableCards.get(3)));
+            Thread.sleep(1500);
+            currentBid = 0;
+            turn(true);
+            temp = players.size();
+            for (ClientHandler ch : players) {
+                if (ch.getPlayer().passedAway) temp--;
+            }
+            if (temp <= 1) continue;
+            broadcast(new GamePacket("środkowe karta:",
+                    GamePacket.Status.TABLE_CARDS, 5, tableCards.get(4)));
+            Thread.sleep(1500);
+            currentBid = 0;
+            turn(true);
+
+
+            players.addLast(players.removeFirst());
+            playersData.addLast(playersData.removeFirst());
+            recentWinners = Showdown();
+            for (ClientHandler winner : recentWinners){
+                winner.getPlayer().money += moneyPool/recentWinners.size();
+            }
+            moneyPool = 0;
         }
-         */
-        players.addLast(players.removeFirst());
-        playersData.addLast(playersData.removeFirst());
         return Showdown();
     }
 
@@ -331,13 +309,15 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             }
             while (!canProceed() || nextRound) {
                 for (int i = 0; i < playersData.size(); i++) {
-                    players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid - players.get(i).getPlayer().curBid ));
-                    lock.lock();
-                    while (!nextPlayer) {
-                        next.await();
+                    if (!playersData.get(i).passedAway) {
+                        players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid - players.get(i).getPlayer().curBid));
+                        lock.lock();
+                        while (!nextPlayer) {
+                            next.await();
+                        }
+                        lock.unlock();
+                        nextPlayer = false;
                     }
-                    lock.unlock();
-                    nextPlayer = false;
                 }
                 nextRound = false;
             }

@@ -5,13 +5,9 @@ import java.net.ServerSocket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.sql.SQLOutput;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class GameServer {
     private ServerSocket serverSocket;
@@ -32,15 +28,39 @@ public class GameServer {
     private static ArrayList<String> nicknames = new ArrayList<>();
     public static ExecutorService executorService;
     public static ArrayList<ClientHandler> handlers = new ArrayList<>();
-    public static ArrayList<Future<ArrayList<ClientHandler>>> furas;
+    public static ArrayList<FutureTask<ArrayList<ClientHandler>>> furas = new ArrayList<>();
 
     public static boolean checkAvailability(String nick){ return !nicknames.contains(nick); }
     public static ArrayList<String> getNicknames(){ return nicknames;}
+    private static TaskManager taskManager;
+
+    private static class TaskManager extends Thread{
+        ExecutorService executor;
+        private List<PokerGame> tasks;
+        private List<FutureTaskCallback> CallbackTasks;
+
+        public TaskManager(){
+            executor = Executors.newCachedThreadPool();
+            tasks = new ArrayList<>();
+            CallbackTasks = new ArrayList<>();
+        }
+
+        public void startTask(PokerGame pokerGame){
+            tasks.add(pokerGame);
+            FutureTaskCallback callback = new FutureTaskCallback(pokerGame);
+            executor.execute(callback);
+        }
+    }
+
 
     public static void addNick(String nick){
         if(!nicknames.contains(nick))
             nicknames.add(nick);
         System.out.println("add: "+nicknames);
+    }
+
+    public static void addNewGameThread(PokerGame pokerGame){
+        GameServer.taskManager.startTask(pokerGame);
     }
 
     public static void removeNick(String nick){
@@ -51,6 +71,8 @@ public class GameServer {
     public void start(int port) throws IOException {
         executorService = Executors.newFixedThreadPool(100);
         serverSocket = new ServerSocket(port);
+        this.taskManager = new TaskManager();
+        taskManager.start();
         System.out.println("---------- URUCHOMIONO SERWER ----------\n");
         System.out.println("ADRES IP SERWERA: " + serverSocket.getInetAddress());
         System.out.println("PORT: " + serverSocket.getLocalPort());

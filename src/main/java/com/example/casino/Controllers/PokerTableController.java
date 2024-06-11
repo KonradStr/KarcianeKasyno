@@ -161,9 +161,9 @@ public class PokerTableController implements Initializable {
         disableButtonCheck();
     }
 
-    public void setYourData(String username){
+    public void setYourData(String username, Integer money){
         this.yourUsername.setText(username);
-        this.yourMoney.setText("1000");
+        this.yourMoney.setText(String.valueOf(money));
     }
 
     public void setYourCard1(Karta yourCard1) {

@@ -28,6 +28,11 @@ public class ClientHandler extends Thread {
     private ObjectInputStream in;
     private String UUID;
 
+    @Override
+    public String toString() {
+        return player.getPlayerData();
+    }
+
     public ClientHandler(Socket socket) {
         this.clientSocket = socket;
         try {
@@ -265,7 +270,7 @@ public class ClientHandler extends Thread {
                                 player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.pokerGames.get(uuid).playersReady == 2) {
 
-                            furas.add(GameServer.executorService.submit(GameServer.pokerGames.get(uuid)));
+                            GameServer.addNewGameThread(GameServer.pokerGames.get(uuid));
                         }
                     } else {
                         GameServer.pokerGames.get(uuid).playersReady--;
