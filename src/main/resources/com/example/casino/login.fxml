@@ -68,10 +68,13 @@
                                 <Font name="System Bold" size="19.0" />
                             </font>
                         </Label>
-                        <Button mnemonicParsing="false" onAction="#login" prefHeight="67.0" prefWidth="118.0" text="zaloguj">
+                        <Button mnemonicParsing="false" onAction="#login" prefHeight="67.0" prefWidth="118.0" text="Zaloguj">
                             <VBox.margin>
                                 <Insets top="80.0" />
-                            </VBox.margin></Button>
+                            </VBox.margin>
+                     <font>
+                        <Font size="18.0" />
+                     </font></Button>
                         <HBox alignment="TOP_CENTER" prefHeight="32.0" prefWidth="390.0">
                             <children>
                                 <Label prefHeight="32.0" prefWidth="155.0" text="Nie masz jeszcze konta?">

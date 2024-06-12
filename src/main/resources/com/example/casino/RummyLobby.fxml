@@ -9,7 +9,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="750.0" prefWidth="1250.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.Controllers.RummyLobbyController">
+<AnchorPane prefHeight="750.0" prefWidth="1250.0" style="-fx-background-color: #ADD8E6;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.Controllers.RummyLobbyController">
     <children>
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="83.0" opacity="0.76" stroke="BLACK" strokeType="INSIDE" width="1258.0" />
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="83.0" layoutY="667.0" opacity="0.76" stroke="BLACK" strokeType="INSIDE" width="1258.0" />
@@ -31,7 +31,7 @@
          <font>
             <Font size="16.0" />
          </font></Label>
-      <HBox fx:id="playersContainer" layoutX="106.0" layoutY="111.0" prefHeight="538.0" prefWidth="1054.0" />
+      <HBox fx:id="playersContainer" alignment="CENTER" layoutX="106.0" layoutY="111.0" prefHeight="538.0" prefWidth="1054.0" spacing="10.0" />
       <Button fx:id="inviteButton" layoutX="1042.0" layoutY="12.0" mnemonicParsing="false" onAction="#copyToClipboard" prefHeight="39.0" prefWidth="183.0" style="-fx-background-color: transparent; -fx-border-color: lightgreen; -fx-border-radius: 0.3; -fx-border-width: 2;" text="Copy Code" textFill="#5ddc13">
          <cursor>
             <Cursor fx:constant="HAND" />

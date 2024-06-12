@@ -358,7 +358,7 @@ public class ClientHandler extends Thread {
 
                     try {
                         Statement st= connection.createStatement();
-                        ResultSet rs = st.executeQuery("SELECT users.username, pokerRanking.Points FROM pokerRanking JOIN users USING(UserID) ORDER BY pokerRanking.Points DESC LIMIT 10"); //do zmiany na remik
+                        ResultSet rs = st.executeQuery("SELECT users.username, rummyRanking.Points FROM rummyRanking JOIN users USING(UserID) ORDER BY rummyRanking.Points DESC LIMIT 10"); //do zmiany na remik
 
                         while (rs.next()) {
                             String username = rs.getString("Username");

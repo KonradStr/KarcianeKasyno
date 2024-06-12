@@ -51,14 +51,13 @@ public class RemikRankingController {
                         setId("second-cell");
                     } else if (getIndex() == 2) {
                         setId("third-cell");
-                    } else if (getIndex()%2 == 0) {
+                    } else if (getIndex() % 2 == 0) {
                         setId("even-cell");
-                    } else if (getIndex()%2 == 1) {
+                    } else if (getIndex() % 2 == 1) {
                         setId("odd-cell");
                     } else {
                         setId(null);
                     }
-
                 }
             };
         });
@@ -91,7 +90,7 @@ public class RemikRankingController {
     }
 
     @FXML
-    public void goBack(){
+    public void goBack() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/casino/Menu.fxml"));
             Parent root = loader.load();
