@@ -22,7 +22,7 @@ public class MiniPlayerController {
         if (ready) {
             status.setImage(new Image(getClass().getResourceAsStream("/images/ready_status.png")));
             statusLabel.setText("Ready");
-            statusLabel.setTextFill(Color.LIGHTGREEN);
+            statusLabel.setTextFill(Color.DARKGREEN);
         } else {
             status.setImage(new Image(getClass().getResourceAsStream("/images/not_ready_status.png")));
             statusLabel.setText("Not Ready");
