@@ -15,7 +15,8 @@ public class GamePacket extends Packet {
         TABLE_CARDS,
         MOVE,
         SMALL_BLIND,
-        BIG_BLIND
+        BIG_BLIND,
+        WINNER
     }
 
     public enum MOVE_TYPE {

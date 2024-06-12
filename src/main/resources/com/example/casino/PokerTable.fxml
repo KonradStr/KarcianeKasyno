@@ -84,10 +84,13 @@
                         </Button>
                         <StackPane prefHeight="150.0" prefWidth="200.0">
                            <children>
-                              <Button fx:id="CheckButton" mnemonicParsing="false" onAction="#callFunc" prefHeight="66.0" prefWidth="122.0" style="-fx-background-color: linear-gradient(grey,black); -fx-border-color: black; -fx-background-radius: 10; -fx-border-radius: 10;" text="Check">
+                              <Button fx:id="CheckButton" mnemonicParsing="false" onAction="#checkFunc" prefHeight="66.0" prefWidth="122.0" style="-fx-background-color: linear-gradient(grey,black); -fx-border-color: black; -fx-background-radius: 10; -fx-border-radius: 10;" text="Check" textFill="WHITE">
                                  <cursor>
                                     <Cursor fx:constant="HAND" />
-                                 </cursor></Button>
+                                 </cursor>
+                                 <font>
+                                    <Font name="System Bold" size="24.0" />
+                                 </font></Button>
                               <Button fx:id="CallButton" mnemonicParsing="false" onAction="#callFunc" prefHeight="66.0" prefWidth="122.0" style="-fx-background-color: linear-gradient(grey,black); -fx-border-color: black; -fx-border-radius: 10; -fx-background-radius: 10;" text="Call" textFill="WHITE">
                                  <font>
                                     <Font name="System Bold" size="24.0" />
@@ -133,6 +136,11 @@
                               <Font name="System Bold" size="20.0" />
                            </font>
                         </Label>
+                        <Label fx:id="yourMove" alignment="CENTER" layoutX="-13.0" layoutY="280.0" prefHeight="49.0" prefWidth="460.0" text="Label" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="35.0" />
+                           </font>
+                        </Label>
                      </children>
                   </AnchorPane>
                   <AnchorPane layoutX="185.0" layoutY="585.0" prefHeight="303.0" prefWidth="460.0">
@@ -169,6 +177,11 @@
                               <Font name="System Bold" size="20.0" />
                            </font>
                         </Label>
+                        <Label fx:id="player4Move" alignment="CENTER" layoutX="-13.0" layoutY="280.0" prefHeight="49.0" prefWidth="460.0" text="Label" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="35.0" />
+                           </font>
+                        </Label>
                      </children>
                   </AnchorPane>
                   <AnchorPane layoutX="1307.0" layoutY="585.0" prefHeight="303.0" prefWidth="460.0">
@@ -185,6 +198,11 @@
                         <Label fx:id="player2Money" alignment="TOP_CENTER" layoutX="110.0" layoutY="215.0" prefHeight="17.0" prefWidth="213.0" style="-fx-background-color: red; -fx-border-color: black; -fx-border-width: 2;" textFill="WHITE">
                            <font>
                               <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="player2Move" alignment="CENTER" layoutX="-13.0" layoutY="280.0" prefHeight="49.0" prefWidth="460.0" text="Label" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="35.0" />
                            </font>
                         </Label>
                      </children>
@@ -205,6 +223,11 @@
                               <Font name="System Bold" size="20.0" />
                            </font>
                         </Label>
+                        <Label fx:id="player1Move" alignment="CENTER" layoutX="-13.0" layoutY="280.0" prefHeight="49.0" prefWidth="460.0" text="Label" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="35.0" />
+                           </font>
+                        </Label>
                      </children>
                   </AnchorPane>
                   <Label fx:id="pool" layoutX="918.0" layoutY="23.0" prefHeight="97.0" prefWidth="122.0" textFill="WHITE">
@@ -215,6 +238,22 @@
                   <Label fx:id="pool1" alignment="CENTER" layoutX="878.0" layoutY="23.0" prefHeight="97.0" prefWidth="40.0" text="\$" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="50.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="player3Move" alignment="CENTER" layoutX="170.0" layoutY="863.0" prefHeight="49.0" prefWidth="460.0" text="Label" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="35.0" />
+                     </font>
+                  </Label>
+                  <Rectangle fx:id="blackRectangle" arcHeight="5.0" arcWidth="5.0" height="1080.0" opacity="0.78" stroke="BLACK" strokeType="INSIDE" width="1920.0" />
+                  <ImageView fx:id="winnerImage" fitHeight="402.0" fitWidth="1019.0" layoutX="452.0" layoutY="347.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../images/winner.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="winnerLabel" alignment="CENTER" layoutX="758.0" layoutY="520.0" prefHeight="127.0" prefWidth="409.0" textFill="#f5e555">
+                     <font>
+                        <Font name="Microsoft YaHei Bold" size="70.0" />
                      </font>
                   </Label>
                </children>

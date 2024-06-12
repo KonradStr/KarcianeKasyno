@@ -6,16 +6,13 @@ import com.example.casino.Packets.Packet;
 import com.example.casino.Packets.PacketType;
 import com.example.casino.Player;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class PokerGame implements Callable<ArrayList<ClientHandler>> {
+public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
     String id;
     int playersReady;
     List<ClientHandler> players;
@@ -31,23 +28,21 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     public void handlerRaiseBetween(ClientHandler ch, Integer r) {
         if (ch.getPlayer().curBid < currentBid) {
             ch.getPlayer().money -= (currentBid - ch.getPlayer().curBid);
-            ch.getPlayer().curBid = currentBid;
         }
         currentBid += r;
+        moneyPool+=currentBid - ch.getPlayer().curBid;
         ch.getPlayer().curBid = currentBid;
         ch.getPlayer().money -= r;
-        updateMoneyPool();
     }
 
     public void handlerRaise(ClientHandler ch, Integer r) {
         if (ch.getPlayer().curBid < currentBid) {
             ch.getPlayer().money -= (currentBid - ch.getPlayer().curBid);
-            ch.getPlayer().curBid = currentBid;
         }
         currentBid += r;
+        moneyPool+=currentBid - ch.getPlayer().curBid;
         ch.getPlayer().curBid = currentBid;
         ch.getPlayer().money -= r;
-        updateMoneyPool();
 
         System.out.println("moni: " + ch.getPlayer().money + " bid: " + ch.getPlayer().curBid + " pool: " + moneyPool + "cuurBid: " + currentBid);
 
@@ -61,9 +56,9 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     public void handlerCall(ClientHandler ch) {
         if (ch.getPlayer().curBid < currentBid) {
             ch.getPlayer().money -= currentBid - ch.getPlayer().curBid;
-            ch.getPlayer().curBid = currentBid;
+            moneyPool += currentBid - ch.getPlayer().curBid;
         }
-        updateMoneyPool();
+        ch.getPlayer().curBid = currentBid;
 
         System.out.println("moni: " + ch.getPlayer().money + " bid: " + ch.getPlayer().curBid + " pool: " + moneyPool+ "cuurBid: " + currentBid);
         for (ClientHandler chInner: players){
@@ -162,10 +157,8 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
         for (ClientHandler ch : players) {
             ch.getPlayer().passedAway = false;
             ch.getPlayer().clearHand();
-            if (isFirstRound) {
-                moneyPool = 0;
-                ch.getPlayer().setMoney(1000);
-            }
+            moneyPool = 0;
+            ch.getPlayer().setMoney(1000);
         }
 
         for (int i = 0; i < players.size(); i++) {
@@ -183,7 +176,7 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
                 System.out.println(p.getPlayerData());
             }
 
-            System.out.println("Liczba graczy");
+            System.out.println("startuje gre");
             ch.sendPacket(new GamePacket("Game Starting",
                     GamePacket.Status.START, ch.getPlayer(), otherPlayers));
         }
@@ -214,9 +207,11 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
     }
 
     @Override
-    public ArrayList<ClientHandler> call() throws Exception { //rozdanie
+    public HashMap<ClientHandler, Integer> call() throws Exception { //rozdanie
 
-        for (int round = 0; round < 5; round++) {
+        HashMap<ClientHandler, Integer> finalPoints = new HashMap<>();
+
+        for (int round = 0; round < 2; round++) {
             deal(round==0);
             Thread.sleep(1000);
             handlerRaiseBetween(players.get(0), 5);
@@ -269,36 +264,69 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             currentBid = 0;
             turn(true);
             int temp = players.size();
+
             for (ClientHandler ch : players) {
                 if (ch.getPlayer().passedAway) temp--;
             }
-            if (temp <= 1) continue;
+            if (temp <= 1) {
+                recentWinners = Showdown();
+                for (ClientHandler winner : recentWinners){
+                    if (finalPoints.containsKey(winner)){
+                        finalPoints.put(winner, finalPoints.get(winner) + moneyPool/recentWinners.size());
+                    }else{
+                        finalPoints.put(winner, moneyPool/recentWinners.size());
+                    }
+                    broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER));
+                    Thread.sleep(5000);
+                }
+                moneyPool = 0;
+                continue;
+            }
             broadcast(new GamePacket("środkowe karta:",
                     GamePacket.Status.TABLE_CARDS, 4, tableCards.get(3)));
             Thread.sleep(1500);
             currentBid = 0;
             turn(true);
             temp = players.size();
+
             for (ClientHandler ch : players) {
                 if (ch.getPlayer().passedAway) temp--;
             }
-            if (temp <= 1) continue;
+            if (temp <= 1) {
+                recentWinners = Showdown();
+                for (ClientHandler winner : recentWinners){
+                    if (finalPoints.containsKey(winner)){
+                        finalPoints.put(winner, finalPoints.get(winner) + moneyPool/recentWinners.size());
+                    }else{
+                        finalPoints.put(winner, moneyPool/recentWinners.size());
+                    }
+                    broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER));
+                    Thread.sleep(5000);
+                }
+                moneyPool = 0;
+                continue;
+            }
             broadcast(new GamePacket("środkowe karta:",
                     GamePacket.Status.TABLE_CARDS, 5, tableCards.get(4)));
             Thread.sleep(1500);
             currentBid = 0;
             turn(true);
-
-
             players.addLast(players.removeFirst());
             playersData.addLast(playersData.removeFirst());
             recentWinners = Showdown();
             for (ClientHandler winner : recentWinners){
-                winner.getPlayer().money += moneyPool/recentWinners.size();
+                if (finalPoints.containsKey(winner)){
+                    finalPoints.put(winner, finalPoints.get(winner) + moneyPool/recentWinners.size());
+                }else{
+                    finalPoints.put(winner, moneyPool/recentWinners.size());
+                }
+                broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER));
+                Thread.sleep(3000);
             }
+
             moneyPool = 0;
         }
-        return Showdown();
+        return finalPoints;
     }
 
         private void turn (boolean nextRound) throws InterruptedException {
@@ -310,7 +338,11 @@ public class PokerGame implements Callable<ArrayList<ClientHandler>> {
             while (!canProceed() || nextRound) {
                 for (int i = 0; i < playersData.size(); i++) {
                     if (!playersData.get(i).passedAway) {
-                        players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid - players.get(i).getPlayer().curBid));
+                        if (currentBid - players.get(i).getPlayer().curBid == 0) {
+                            players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CHECK, currentBid - players.get(i).getPlayer().curBid));
+                        }else{
+                            players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid - players.get(i).getPlayer().curBid));
+                        }
                         lock.lock();
                         while (!nextPlayer) {
                             next.await();

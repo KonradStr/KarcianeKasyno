@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,6 +53,9 @@ public class PokerTableController implements Initializable {
     private ImageView yourCard1;
     @FXML
     private ImageView yourCard2;
+
+    @FXML
+    private Label yourMove;
 
     @FXML
     private ImageView player1Card1;
@@ -109,7 +113,26 @@ public class PokerTableController implements Initializable {
     private Integer currentBid;
 
 
+    @FXML
+    private Label player1Move;
 
+    @FXML
+    private Label player2Move;
+
+    @FXML
+    private Label player3Move;
+
+    @FXML
+    private Label player4Move;
+
+    @FXML
+    private ImageView winnerImage;
+
+    @FXML
+    private Label winnerLabel;
+
+    @FXML
+    Rectangle blackRectangle;
     @FXML
     public void callFunc(){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid));
@@ -119,17 +142,20 @@ public class PokerTableController implements Initializable {
         disableButtonFold();
         disableButtonRaise();
         disableButtonCheck();
-
+        showUserMoveText("CALL");
+        hideAllUsersMoves();
     }
 
 
     @FXML
     public void checkFunc(){
-        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CHECK));
+        Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
         disableButtonCall();
         disableButtonFold();
         disableButtonRaise();
         disableButtonCheck();
+        showUserMoveText("CHECK");
+        hideAllUsersMoves();
     }
 
     @FXML
@@ -139,6 +165,8 @@ public class PokerTableController implements Initializable {
         disableButtonFold();
         disableButtonRaise();
         disableButtonCheck();
+        showUserMoveText("FOLD");
+        hideAllUsersMoves();
     }
 
     @FXML
@@ -150,6 +178,8 @@ public class PokerTableController implements Initializable {
         disableButtonFold();
         disableButtonRaise();
         disableButtonCheck();
+        showUserMoveText("RAISE");
+        hideAllUsersMoves();
     }
 
     @FXML
@@ -181,108 +211,55 @@ public class PokerTableController implements Initializable {
     public void assignPlayers(List<Player> plyerList){
         // TODO : popraw to prosze
         Player player1 = plyerList.get(0);
-        PlayerFields playerFields = new PlayerFields(player1Money, player1Username, player1Card1, player1Card2);
+        PlayerFields playerFields = new PlayerFields(player1Money, player1Username, player1Card1, player1Card2, player1Move);
         playerFields.setPlayer(player1, true);
         playersFields.put(player1, playerFields);
         if (plyerList.size() == 1) return;
         Player player2 = plyerList.get(1);
-        playerFields = new PlayerFields(player2Money, player2Username, player2Card1, player2Card2);
+        playerFields = new PlayerFields(player2Money, player2Username, player2Card1, player2Card2, player2Move);
         playerFields.setPlayer(player2, true);
         playersFields.put(player2, playerFields);
         if (plyerList.size() == 2) return;
         Player player3 = plyerList.get(2);
-        playerFields = new PlayerFields(player3Money, player3Username, player3Card1, player3Card2);
+        playerFields = new PlayerFields(player3Money, player3Username, player3Card1, player3Card2, player3Move);
         playerFields.setPlayer(player3, true);
         playersFields.put(player3, playerFields);
         if (plyerList.size() == 3) return;
         Player player4 = plyerList.get(3);
-        playerFields = new PlayerFields(player4Money, player4Username, player4Card1, player4Card2);
+        playerFields = new PlayerFields(player4Money, player4Username, player4Card1, player4Card2, player4Move);
         playerFields.setPlayer(player4, true);
         playersFields.put(player4, playerFields);
     }
 
-    private void setFirstPlayer(Player player, boolean back) {
-        if (back) {
-            this.player1Username.setText(player.getPlayerData());
-            this.player1Money.setText(String.valueOf(player.getMoney()));
-            this.player1Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-            this.player1Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-        } else {
-            String rank = Rank.rank.get(player.getCard1().rank.toString());
-            String color = player.getCard1().kolor.toString();
-            this.player1Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-            rank = Rank.rank.get(player.getCard2().rank.toString());
-            color = player.getCard2().kolor.toString();
-            this.player1Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-        }
-    }
-
-    private void setSecondPlayer(Player player, boolean back) {
-        if (back) {
-            this.player2Username.setText(player.getPlayerData());
-            this.player2Money.setText(String.valueOf(player.getMoney()));
-            this.player2Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-            this.player2Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-        } else {
-            String rank = Rank.rank.get(player.getCard1().rank.toString());
-            String color = player.getCard1().kolor.toString();
-            this.player2Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-            rank = Rank.rank.get(player.getCard2().rank.toString());
-            color = player.getCard2().kolor.toString();
-            this.player2Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-        }
-    }
-
-    private void setThirdPlayer(Player player, boolean back) {
-        if (back) {
-            this.player3Username.setText(player.getPlayerData());
-            this.player3Money.setText(String.valueOf(player.getMoney()));
-            this.player3Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-            this.player3Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-        } else {
-            String rank = Rank.rank.get(player.getCard1().rank.toString());
-            String color = player.getCard1().kolor.toString();
-            this.player3Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-            rank = Rank.rank.get(player.getCard2().rank.toString());
-            color = player.getCard2().kolor.toString();
-            this.player3Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-        }
-    }
-
-    private void setFourthPlayer(Player player, boolean back) {
-        if (back) {
-            this.player4Username.setText(player.getPlayerData());
-            this.player4Money.setText(String.valueOf(player.getMoney()));
-            this.player4Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-            this.player4Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/back.png")));
-        } else {
-            String rank = Rank.rank.get(player.getCard1().rank.toString());
-            String color = player.getCard1().kolor.toString();
-            this.player4Card1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-            rank = Rank.rank.get(player.getCard2().rank.toString());
-            color = player.getCard2().kolor.toString();
-            this.player4Card2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
-        }
-    }
 
     public void smallBlind(){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 5));
         currentBid = 5;
+        hideAllUsersMoves();
+        showUserMoveText("SMALL BLIND");
     }
     public void otherSmallBlind(Player player){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
         playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 5));
+        hideUserText();
+        hideAllUsersMoves();
+        playersFields.get(player).showUserMoveText("SMALL BLIND");
     }
     public void otherBigBlind(Player player){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
         playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 10));
+        hideUserText();
+        hideAllUsersMoves();
+        playersFields.get(player).showUserMoveText("BIG BLIND");
     }
 
     public void bigBlind(){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 10));
         currentBid = 10;
+        hideAllUsersMoves();
+        showUserMoveText("BIG BLIND");
     }
 
     public void setTableCard(Integer cardIndex, Karta card){
@@ -315,7 +292,6 @@ public class PokerTableController implements Initializable {
 
     public void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid){
         this.currentBid = currentBid;
-        System.out.println("currnetBid: " + currentBid);
         if (moveType.equals(GamePacket.MOVE_TYPE.CHECK)) {
             enableButtonFold();
             enableButtonRaise();
@@ -335,17 +311,31 @@ public class PokerTableController implements Initializable {
     public void otherMakeMove(Player player, GamePacket.MOVE_TYPE moveType, Integer money){
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + (Integer.valueOf(playersFields.get(player).getMoney()) - money)));
         playersFields.get(player).setMoney(String.valueOf(money));
+        hideUserText();
+        hideAllUsersMoves();
+        switch(moveType){
+            case CALL -> playersFields.get(player).showUserMoveText("CALL");
+            case FOLD -> playersFields.get(player).showUserMoveText("FOLD");
+            case CHECK -> playersFields.get(player).showUserMoveText("CHECK");
+            case RAISE -> playersFields.get(player).showUserMoveText("RAISE");
+        }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        hideUserText();
         disableButtonFold();
         disableButtonCheck();
         disableButtonRaise();
         disableButtonCall();
         hideButtonCheck();
+        hideWinner();
         this.pool.setText("0");
         this.playersFields = new HashMap<>();
+        this.player1Move.setVisible(false);
+        this.player2Move.setVisible(false);
+        this.player3Move.setVisible(false);
+        this.player4Move.setVisible(false);
     }
 
     private void disableButtonCall(){
@@ -391,4 +381,33 @@ public class PokerTableController implements Initializable {
     private void showButtonCall(){
         this.CallButton.setVisible(true);
     }
+
+    private void showUserMoveText(String text){
+        this.yourMove.setText(text);
+        this.yourMove.setVisible(true);
+    }
+
+    private void hideUserText(){
+        this.yourMove.setVisible(false);
+    }
+
+    private void hideAllUsersMoves(){
+        for (Map.Entry<Player, PlayerFields> set : playersFields.entrySet()) {
+            set.getValue().hideUserText();
+        }
+    }
+
+    public void hideWinner(){
+        this.blackRectangle.setVisible(false);
+        this.winnerImage.setVisible(false);
+        this.winnerLabel.setVisible(false);
+    }
+
+    public void showWinner(String username){
+        this.blackRectangle.setVisible(true);
+        this.winnerLabel.setText(username + " wins");
+        this.winnerImage.setVisible(true);
+        this.winnerLabel.setVisible(true);
+    }
+
 }

@@ -11,15 +11,23 @@ public class PlayerFields {
     private Label username;
     private ImageView firstCard;
     private ImageView secondCard;
+    private Label move;
+    private String firstCardRank;
+    private String firstCardColor;
 
-    public PlayerFields(Label money, Label username, ImageView firstCard, ImageView secondCard) {
+    private String secondCardRank;
+    private String secondCardColor;
+
+    public PlayerFields(Label money, Label username, ImageView firstCard, ImageView secondCard, Label move) {
         this.money = money;
         this.username = username;
         this.firstCard = firstCard;
         this.secondCard = secondCard;
+        this.move = move;
     }
 
     public void setPlayer(Player player, boolean back) {
+        this.move.setVisible(false);
         if (back) {
             this.username.setText(player.getPlayerData());
             this.money.setText(String.valueOf(player.getMoney()));
@@ -41,6 +49,21 @@ public class PlayerFields {
 
     public String getMoney() {
         return money.getText();
+    }
+
+    public void showUserMoveText(String text){
+        move.setText(text);
+        move.setVisible(true);
+    }
+
+    public void hideUserText(){
+        move.setVisible(false);
+    }
+
+    public void turnOver(){
+        this.firstCard.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + firstCardRank + firstCardColor + ".png")));
+        this.secondCard.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + firstCardRank + firstCardColor + ".png")));
+
     }
 }
 

@@ -158,7 +158,20 @@ public class ClientHandler extends Thread {
                             player = new Player(userID, username, false);
                             System.out.println("rejestracja jest spoko ok");
                             GameServer.addNick(username);
+                            sql = "INSERT INTO pokerRanking (UserID, Points) " +
+                                    "VALUES (?,?)";
+                            preparedStatement = connection.prepareStatement(sql);
+                            preparedStatement.setInt(1, userID);
+                            preparedStatement.setInt(2, 0);
+                            preparedStatement.execute();
+                            sql = "INSERT INTO rummyRanking (UserID, Points) " +
+                                    "VALUES (?,?)";
+                            preparedStatement = connection.prepareStatement(sql);
+                            preparedStatement.setInt(1, userID);
+                            preparedStatement.setInt(2, 0);
+                            preparedStatement.execute();
                         }
+
                         sendPacket(new RegisterPacket("Registered", player, RegisterPacket.Status.REGISTER));
 
                     }

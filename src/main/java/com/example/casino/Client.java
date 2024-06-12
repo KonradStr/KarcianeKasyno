@@ -231,6 +231,10 @@ public class Client extends Thread {
                                 makeMove(gamePacket.getMove_type(), gamePacket.getCurrentBid())
                         );
                     }
+                } else if (status.equals(GamePacket.Status.WINNER)) {
+                    Platform.runLater(() ->
+                            showWinner(gamePacket.getDesc())
+                    );
                 }
                 break;
             }
@@ -477,6 +481,10 @@ public class Client extends Thread {
 
     private void otherMakeMove(Player player, GamePacket.MOVE_TYPE moveType, Integer money) {
         this.ptc.otherMakeMove(player, moveType, money);
+    }
+
+    private void showWinner(String winnerUsername) {
+        this.ptc.showWinner(winnerUsername);
     }
 
 
