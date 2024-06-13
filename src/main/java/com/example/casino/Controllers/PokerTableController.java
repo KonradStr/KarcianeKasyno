@@ -315,10 +315,15 @@ public class PokerTableController implements Initializable {
         hideAllUsersMoves();
         switch(moveType){
             case CALL -> playersFields.get(player).showUserMoveText("CALL");
-            case FOLD -> playersFields.get(player).showUserMoveText("FOLD");
+            case FOLD -> userFolded(player);
             case CHECK -> playersFields.get(player).showUserMoveText("CHECK");
             case RAISE -> playersFields.get(player).showUserMoveText("RAISE");
         }
+    }
+
+    private void userFolded(Player player){
+        playersFields.get(player).showUserMoveText("FOLD");
+        playersFields.get(player).folded();
     }
 
     @Override

@@ -34,7 +34,7 @@ public class GameServer {
     public static ArrayList<String> getNicknames(){ return nicknames;}
     private static TaskManager taskManager;
 
-    private static class TaskManager extends Thread{
+    private static class TaskManager{
         ExecutorService executor;
         private List<PokerGame> tasks;
         private List<FutureTaskCallback> CallbackTasks;
@@ -72,7 +72,6 @@ public class GameServer {
         executorService = Executors.newFixedThreadPool(100);
         serverSocket = new ServerSocket(port);
         this.taskManager = new TaskManager();
-        taskManager.start();
         System.out.println("---------- URUCHOMIONO SERWER ----------\n");
         System.out.println("ADRES IP SERWERA: " + serverSocket.getInetAddress());
         System.out.println("PORT: " + serverSocket.getLocalPort());

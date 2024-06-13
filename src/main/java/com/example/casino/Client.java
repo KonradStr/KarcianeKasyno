@@ -235,6 +235,10 @@ public class Client extends Thread {
                     Platform.runLater(() ->
                             showWinner(gamePacket.getDesc())
                     );
+                } else if (status.equals(GamePacket.Status.END_GAME)){
+                    Platform.runLater(() ->
+                            openMenu()
+                    );
                 }
                 break;
             }
@@ -336,6 +340,8 @@ public class Client extends Thread {
             Main.stage.setTitle("Menu");
             Main.stage.setScene(new Scene(root));
             Main.stage.show();
+            Main.stage.sizeToScene();
+            Main.stage.setFullScreen(false);
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("error in loading table");

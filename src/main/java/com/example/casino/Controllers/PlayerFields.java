@@ -5,6 +5,7 @@ import com.example.casino.Server.Rank;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Paint;
 
 public class PlayerFields {
     private Label money;
@@ -63,7 +64,17 @@ public class PlayerFields {
     public void turnOver(){
         this.firstCard.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + firstCardRank + firstCardColor + ".png")));
         this.secondCard.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + firstCardRank + firstCardColor + ".png")));
+    }
 
+    public void folded(){
+        this.secondCard.setOpacity(0.7);
+        this.firstCard.setOpacity(0.7);
+        this.username.setOpacity(0.7);
+        this.username.setOpacity(0.7);
+        this.money.setOpacity(0.7);
+        this.move.setText("FOLDED");
+        this.move.setTextFill(Paint.valueOf("red"));
+        this.move.setVisible(true);
     }
 }
 

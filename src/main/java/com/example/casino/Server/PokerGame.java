@@ -70,7 +70,11 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
 
     public void handlerFold(ClientHandler ch) {
         ch.getPlayer().pass();
-        //broadcast(new Packet(PacketType.GAME, ch.toString() + " folded"));
+        for (ClientHandler chInner: players){
+            if (!ch.equals(chInner)){
+                chInner.sendPacket(new GamePacket("other user called", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.FOLD, ch.getPlayer(), ch.getPlayer().money));
+            }
+        }
     }
 
     public void updateMoneyPool() {
@@ -159,6 +163,7 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
             ch.getPlayer().clearHand();
             moneyPool = 0;
             ch.getPlayer().setMoney(1000);
+
         }
 
         for (int i = 0; i < players.size(); i++) {
@@ -326,6 +331,8 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
 
             moneyPool = 0;
         }
+        Thread.sleep(2000);
+        broadcast(new GamePacket("Game ended", GamePacket.Status.END_GAME));
         return finalPoints;
     }
 

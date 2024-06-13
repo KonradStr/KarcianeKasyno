@@ -16,7 +16,8 @@ public class GamePacket extends Packet {
         MOVE,
         SMALL_BLIND,
         BIG_BLIND,
-        WINNER
+        WINNER,
+        END_GAME
     }
 
     public enum MOVE_TYPE {

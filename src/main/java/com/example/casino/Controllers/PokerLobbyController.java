@@ -74,6 +74,7 @@ public class PokerLobbyController {
 
     @FXML
     public void leaveGame() {
+        Main.client.sendPacket(new GameReadyPacket("notready", GameReadyPacket.GameType.POKER, uuid.getText(), GameReadyPacket.Status.NOT_READY));
         Main.client.sendPacket(new JoinGamePacket("leave", uuid.getText(), JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEAVE));
     }
 

@@ -57,6 +57,7 @@ public class ClientHandler extends Thread {
 
             } catch (EOFException e) {
                 System.err.println("Klient zamknął połączenie: " + clientSocket.getInetAddress());
+                GameServer.removeNick(this.player.getPlayerData());
                 break;
 
             } catch (IOException | ClassNotFoundException e) {
@@ -231,12 +232,16 @@ public class ClientHandler extends Thread {
                         sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(),
                                 JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEFT));
                     } else {
-                        game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(),
-                                JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
-                        game.players.add(this);
-                        game.playersData.add(this.player);
-                        sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(),
-                                JoinGamePacket.GameType.POKER, game.playersData, JoinGamePacket.Status.JOINED));
+                        if (game.players.size() == 5){
+                            System.out.println("pełne lobby");
+                        }else {
+                            game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(),
+                                    JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
+                            game.players.add(this);
+                            game.playersData.add(this.player);
+                            sendPacket(new JoinGamePacket("JOINED", joinRequest.getUUID(),
+                                    JoinGamePacket.GameType.POKER, game.playersData, JoinGamePacket.Status.JOINED));
+                        }
                     }
                 } else {
                     RummyGame game = GameServer.rummyGames.get(joinRequest.getUUID());
@@ -281,7 +286,7 @@ public class ClientHandler extends Thread {
                         player.setReady(true);
                         GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType,
                                 player, uuid, GameReadyPacket.Status.READY));
-                        if (GameServer.pokerGames.get(uuid).playersReady == 2) {
+                        if (GameServer.pokerGames.get(uuid).playersReady > 1 && pokerGames.get(uuid).playersReady == pokerGames.get(uuid).players.size()) {
 
                             GameServer.addNewGameThread(GameServer.pokerGames.get(uuid));
                         }
