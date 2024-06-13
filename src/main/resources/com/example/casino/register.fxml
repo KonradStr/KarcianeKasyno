@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -98,7 +99,10 @@
                   <Button mnemonicParsing="false" onAction="#register" prefHeight="67.0" prefWidth="118.0" text="Zarejestruj się">
                      <VBox.margin>
                         <Insets top="15.0" />
-                     </VBox.margin></Button>
+                     </VBox.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
                   <HBox alignment="TOP_CENTER" prefHeight="35.0" prefWidth="390.0">
                      <children>
                         <Label prefHeight="32.0" prefWidth="101.0" text="Masz już konto?">
@@ -113,6 +117,9 @@
                            <padding>
                               <Insets left="-3.0" />
                            </padding>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
                         </Button>
                      </children>
                      <VBox.margin>
@@ -142,6 +149,9 @@
                      <padding>
                         <Insets top="-7.0" />
                      </padding>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                   <Button fx:id="exit" graphicTextGap="2.0" mnemonicParsing="false" onAction="#closeWindow" prefHeight="21.0" prefWidth="30.0" style="-fx-background-color: transparent;" text="x" textFill="#bfb1b1">
                      <font>
@@ -150,6 +160,9 @@
                      <padding>
                         <Insets bottom="-3.0" top="-3.0" />
                      </padding>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                </children>
             </StackPane>

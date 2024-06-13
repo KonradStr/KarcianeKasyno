@@ -30,22 +30,28 @@ public class GameServer {
     public static ArrayList<ClientHandler> handlers = new ArrayList<>();
     public static ArrayList<FutureTask<ArrayList<ClientHandler>>> furas = new ArrayList<>();
 
-    public static boolean checkAvailability(String nick){ return !nicknames.contains(nick); }
-    public static ArrayList<String> getNicknames(){ return nicknames;}
+    public static boolean checkAvailability(String nick) {
+        return !nicknames.contains(nick);
+    }
+
+    public static ArrayList<String> getNicknames() {
+        return nicknames;
+    }
+
     private static TaskManager taskManager;
 
-    private static class TaskManager{
+    private static class TaskManager {
         ExecutorService executor;
         private List<PokerGame> tasks;
         private List<FutureTaskCallback> CallbackTasks;
 
-        public TaskManager(){
+        public TaskManager() {
             executor = Executors.newCachedThreadPool();
             tasks = new ArrayList<>();
             CallbackTasks = new ArrayList<>();
         }
 
-        public void startTask(PokerGame pokerGame){
+        public void startTask(PokerGame pokerGame) {
             tasks.add(pokerGame);
             FutureTaskCallback callback = new FutureTaskCallback(pokerGame);
             executor.execute(callback);
@@ -53,19 +59,17 @@ public class GameServer {
     }
 
 
-    public static void addNick(String nick){
-        if(!nicknames.contains(nick))
+    public static void addNick(String nick) {
+        if (!nicknames.contains(nick))
             nicknames.add(nick);
-        System.out.println("add: "+nicknames);
     }
 
-    public static void addNewGameThread(PokerGame pokerGame){
+    public static void addNewGameThread(PokerGame pokerGame) {
         GameServer.taskManager.startTask(pokerGame);
     }
 
-    public static void removeNick(String nick){
+    public static void removeNick(String nick) {
         nicknames.remove(nick);
-        System.out.println(nick + "remove: "+nicknames);
     }
 
     public void start(int port) throws IOException {
@@ -73,7 +77,7 @@ public class GameServer {
         serverSocket = new ServerSocket(port);
         this.taskManager = new TaskManager();
         System.out.println("---------- URUCHOMIONO SERWER ----------\n");
-        System.out.println("ADRES IP SERWERA: " + serverSocket.getInetAddress());
+        System.out.println("ADRES IP SERWERA: " + serverSocket.getInetAddress().getHostAddress());
         System.out.println("PORT: " + serverSocket.getLocalPort());
         while (true) {
             handlers.add(new ClientHandler(serverSocket.accept()));

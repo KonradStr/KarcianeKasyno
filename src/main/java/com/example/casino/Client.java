@@ -76,24 +76,21 @@ public class Client extends Thread {
                 LoginPacket.Status status = loginRespone.getStatus();
                 if (status.equals(LoginPacket.Status.LOGIN)) {
                     System.out.println("Zalogowano");
-                    System.out.println(data);
                     Main.player = loginRespone.getPlayer();
                     Platform.runLater(() ->
                             openMenu()
                     );
                 } else if (status.equals(LoginPacket.Status.LOGOUT)) {
-                    GameServer.removeNick(loginRespone.getLogin()+"Client71");
+                    GameServer.removeNick(loginRespone.getLogin() + "Client71");
                     System.out.println("Wylogowano");
                     Platform.runLater(() ->
                             logOut()
                     );
                 } else if (status.equals(LoginPacket.Status.PASWWORD_ERROR)) {
-                    System.out.println(data);
                     Platform.runLater(() ->
                             showLoginErr("PODANO NIEPOPRAWNE HASŁO")
                     );
                 } else if (status.equals(LoginPacket.Status.ACOUNT_NOT_FOUND_ERROR)) {
-                    System.out.println(data);
                     Platform.runLater(() ->
                             showLoginErr("NIE ISTNIEJE TAKIE KONTO")
                     );
@@ -127,7 +124,6 @@ public class Client extends Thread {
                 String data = createGamePacket.getDesc();
                 if (data.split(":")[0].equals("GameCreated")) {
                     System.out.println("utworzono gre");
-                    System.out.println(createGamePacket.getGameType());
                     Platform.runLater(() ->
                             openLobby(String.valueOf(createGamePacket.getGameType()), createGamePacket.getUUID(), new ArrayList<>(List.of(Main.player)))
                     );
@@ -141,7 +137,6 @@ public class Client extends Thread {
                 JoinGamePacket.GameType gameType = joinGamePacket.getGameType();
                 if (status.equals(JoinGamePacket.Status.JOINED)) {
                     System.out.println("dołączono do gry");
-                    System.out.println(gameType);
                     Platform.runLater(() ->
                             openLobby(String.valueOf(gameType), joinGamePacket.getUUID(), joinGamePacket.getPlayers())
                     );
@@ -182,10 +177,10 @@ public class Client extends Thread {
             case GAME: {
                 GamePacket gamePacket = (GamePacket) respone;
                 GamePacket.Status status = gamePacket.getStatus();
-                System.out.println("przyjeto pakiet" + gamePacket.getStatus());
                 if (status.equals(GamePacket.Status.START)) {
                     Platform.runLater(() -> {
                         startGame(gamePacket.getPlayers(), gamePacket.getPlayer());
+                        gamePacket.getPlayer().setReady(false);
                     });
                 } else if (status.equals(GamePacket.Status.FIRST_HAND_CARD)) {
                     Platform.runLater(() ->
@@ -223,7 +218,7 @@ public class Client extends Thread {
                 } else if (status.equals(GamePacket.Status.MOVE)) {
                     if (gamePacket.getPlayer() != null) {
                         Platform.runLater(() ->
-                                otherMakeMove(gamePacket.getPlayer(), gamePacket.getMove_type(), gamePacket.getCurrentBid())
+                                        otherMakeMove(gamePacket.getPlayer(), gamePacket.getMove_type(), gamePacket.getCurrentBid())
                                 //tutaj w getcurrentbid jest liczba na jaka ma usatwic sie wartoc gracza
                         );
                     } else {
@@ -233,9 +228,9 @@ public class Client extends Thread {
                     }
                 } else if (status.equals(GamePacket.Status.WINNER)) {
                     Platform.runLater(() ->
-                            showWinner(gamePacket.getDesc())
+                            showWinner(gamePacket.getDesc(), gamePacket.getPlayer(), gamePacket.getCard(), gamePacket.getCard2())
                     );
-                } else if (status.equals(GamePacket.Status.END_GAME)){
+                } else if (status.equals(GamePacket.Status.END_GAME)) {
                     Platform.runLater(() ->
                             openMenu()
                     );
@@ -245,9 +240,7 @@ public class Client extends Thread {
             case REMIK: {
                 RemikPacket remikPacket = (RemikPacket) respone;
                 RemikPacket.Status status = remikPacket.getStatus();
-                System.out.println("bez start");
                 if (status.equals(RemikPacket.Status.START)) {
-                    System.out.println("start");
                     Platform.runLater(() -> {
                         startGameRemik(remikPacket.getPlayers(), remikPacket.getPlayer().getPlayerData());
                     });
@@ -256,7 +249,7 @@ public class Client extends Thread {
                 }
                 break;
             }
-            case RANKING:{
+            case RANKING: {
                 RankingPacket rankingPacket = (RankingPacket) respone;
                 RankingPacket.Status status = rankingPacket.getStatus();
                 if (status.equals(RankingPacket.Status.POKER)) {
@@ -277,7 +270,7 @@ public class Client extends Thread {
         }
     }
 
-    private void goToPokerRanking(HashMap<String,Integer> RankingMap){
+    private void goToPokerRanking(HashMap<String, Integer> RankingMap) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("PokerRanking.fxml"));
             Parent root = loader.load();
@@ -295,7 +288,7 @@ public class Client extends Thread {
         }
     }
 
-    private void goToRemikRanking(HashMap<String,Integer> RankingMap){
+    private void goToRemikRanking(HashMap<String, Integer> RankingMap) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("RemikRanking.fxml"));
             Parent root = loader.load();
@@ -312,7 +305,6 @@ public class Client extends Thread {
             System.err.println("error switching to remik ranking ");
         }
     }
-
 
 
     private void logOut() {
@@ -489,8 +481,8 @@ public class Client extends Thread {
         this.ptc.otherMakeMove(player, moveType, money);
     }
 
-    private void showWinner(String winnerUsername) {
-        this.ptc.showWinner(winnerUsername);
+    private void showWinner(String winnerUsername, Player player, Karta card1, Karta card2) {
+        this.ptc.showWinner(winnerUsername, player, card1, card2);
     }
 
 
@@ -525,7 +517,7 @@ public class Client extends Thread {
         this.lc = lc;
     }
 
-    public void setMenuController(MenuController mc){
+    public void setMenuController(MenuController mc) {
         this.mc = mc;
     }
 

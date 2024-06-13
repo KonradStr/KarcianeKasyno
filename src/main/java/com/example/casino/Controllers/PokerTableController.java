@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public class PokerTableController implements Initializable {
-      @FXML
+    @FXML
     private Button CallButton;
 
     @FXML
@@ -133,10 +133,17 @@ public class PokerTableController implements Initializable {
 
     @FXML
     Rectangle blackRectangle;
+
     @FXML
-    public void callFunc(){
-        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid));
-        yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - currentBid));
+    public void callFunc() {
+        if (Integer.valueOf(yourMoney.getText()) < currentBid) {
+            pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + Integer.valueOf(yourMoney.getText())));
+            yourMoney.setText("0");
+        } else {
+
+            pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid));
+            yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - currentBid));
+        }
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
         disableButtonCall();
         disableButtonFold();
@@ -148,7 +155,7 @@ public class PokerTableController implements Initializable {
 
 
     @FXML
-    public void checkFunc(){
+    public void checkFunc() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL));
         disableButtonCall();
         disableButtonFold();
@@ -159,7 +166,7 @@ public class PokerTableController implements Initializable {
     }
 
     @FXML
-    public void foldFunc(){
+    public void foldFunc() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.FOLD));
         disableButtonCall();
         disableButtonFold();
@@ -170,9 +177,14 @@ public class PokerTableController implements Initializable {
     }
 
     @FXML
-    public void raiseFunc(){
-        pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid + 50));
-        yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - (currentBid + 50)));
+    public void raiseFunc() {
+        if (Integer.valueOf(yourMoney.getText()) < (currentBid + 50)) {
+            pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid + Integer.valueOf(yourMoney.getText())));
+            yourMoney.setText("0");
+        } else {
+            pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + currentBid + 50));
+            yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - (currentBid + 50)));
+        }
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.RAISE));
         disableButtonCall();
         disableButtonFold();
@@ -183,7 +195,7 @@ public class PokerTableController implements Initializable {
     }
 
     @FXML
-    public void nextPlayer(){
+    public void nextPlayer() {
         Main.client.sendPacket(new GamePacket("next", GamePacket.Status.MOVE));
         disableButtonCall();
         disableButtonFold();
@@ -191,7 +203,7 @@ public class PokerTableController implements Initializable {
         disableButtonCheck();
     }
 
-    public void setYourData(String username, Integer money){
+    public void setYourData(String username, Integer money) {
         this.yourUsername.setText(username);
         this.yourMoney.setText(String.valueOf(money));
     }
@@ -199,16 +211,16 @@ public class PokerTableController implements Initializable {
     public void setYourCard1(Karta yourCard1) {
         String rank = Rank.rank.get(yourCard1.rank.toString());
         String color = yourCard1.kolor.toString();
-        this.yourCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/"+rank+color+".png")));
+        this.yourCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
     }
 
     public void setYourCard2(Karta yourCard2) {
         String rank = Rank.rank.get(yourCard2.rank.toString());
         String color = yourCard2.kolor.toString();
-        this.yourCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/"+rank+color+".png")));
+        this.yourCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
     }
 
-    public void assignPlayers(List<Player> plyerList){
+    public void assignPlayers(List<Player> plyerList) {
         // TODO : popraw to prosze
         Player player1 = plyerList.get(0);
         PlayerFields playerFields = new PlayerFields(player1Money, player1Username, player1Card1, player1Card2, player1Move);
@@ -232,29 +244,31 @@ public class PokerTableController implements Initializable {
     }
 
 
-    public void smallBlind(){
+    public void smallBlind() {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 5));
         currentBid = 5;
         hideAllUsersMoves();
         showUserMoveText("SMALL BLIND");
     }
-    public void otherSmallBlind(Player player){
+
+    public void otherSmallBlind(Player player) {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 5));
-        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 5));
+        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney()) - 5));
         hideUserText();
         hideAllUsersMoves();
         playersFields.get(player).showUserMoveText("SMALL BLIND");
     }
-    public void otherBigBlind(Player player){
+
+    public void otherBigBlind(Player player) {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
-        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney())  - 10));
+        playersFields.get(player).setMoney(String.valueOf(Integer.valueOf(playersFields.get(player).getMoney()) - 10));
         hideUserText();
         hideAllUsersMoves();
         playersFields.get(player).showUserMoveText("BIG BLIND");
     }
 
-    public void bigBlind(){
+    public void bigBlind() {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + 10));
         yourMoney.setText(String.valueOf(Integer.valueOf(yourMoney.getText()) - 10));
         currentBid = 10;
@@ -262,27 +276,27 @@ public class PokerTableController implements Initializable {
         showUserMoveText("BIG BLIND");
     }
 
-    public void setTableCard(Integer cardIndex, Karta card){
+    public void setTableCard(Integer cardIndex, Karta card) {
         String rank = Rank.rank.get(card.rank.toString());
         String color = card.kolor.toString();
-        switch (cardIndex){
-            case 1 :{
+        switch (cardIndex) {
+            case 1: {
                 TableCard1.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 2 :{
+            case 2: {
                 TableCard2.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 3 :{
+            case 3: {
                 TableCard3.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 4 :{
+            case 4: {
                 TableCard4.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
-            case 5 :{
+            case 5: {
                 TableCard5.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + rank + color + ".png")));
                 break;
             }
@@ -290,7 +304,7 @@ public class PokerTableController implements Initializable {
 
     }
 
-    public void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid){
+    public void makeMove(GamePacket.MOVE_TYPE moveType, Integer currentBid) {
         this.currentBid = currentBid;
         if (moveType.equals(GamePacket.MOVE_TYPE.CHECK)) {
             enableButtonFold();
@@ -299,7 +313,7 @@ public class PokerTableController implements Initializable {
             enableButtonCheck();
             hideButtonCall();
             showButtonCheck();
-        }else{
+        } else {
             enableButtonFold();
             enableButtonRaise();
             disableButtonCheck();
@@ -308,12 +322,13 @@ public class PokerTableController implements Initializable {
             showButtonCall();
         }
     }
-    public void otherMakeMove(Player player, GamePacket.MOVE_TYPE moveType, Integer money){
+
+    public void otherMakeMove(Player player, GamePacket.MOVE_TYPE moveType, Integer money) {
         pool.setText(String.valueOf(Integer.valueOf(pool.getText()) + (Integer.valueOf(playersFields.get(player).getMoney()) - money)));
         playersFields.get(player).setMoney(String.valueOf(money));
         hideUserText();
         hideAllUsersMoves();
-        switch(moveType){
+        switch (moveType) {
             case CALL -> playersFields.get(player).showUserMoveText("CALL");
             case FOLD -> userFolded(player);
             case CHECK -> playersFields.get(player).showUserMoveText("CHECK");
@@ -321,7 +336,7 @@ public class PokerTableController implements Initializable {
         }
     }
 
-    private void userFolded(Player player){
+    private void userFolded(Player player) {
         playersFields.get(player).showUserMoveText("FOLD");
         playersFields.get(player).folded();
     }
@@ -343,76 +358,87 @@ public class PokerTableController implements Initializable {
         this.player4Move.setVisible(false);
     }
 
-    private void disableButtonCall(){
+    private void disableButtonCall() {
         this.CallButton.setDisable(true);
     }
 
-    private void disableButtonCheck(){
+    private void disableButtonCheck() {
         this.CheckButton.setDisable(true);
     }
-    private void disableButtonRaise(){
+
+    private void disableButtonRaise() {
         this.RaiseButton.setDisable(true);
     }
 
-    private void disableButtonFold(){
+    private void disableButtonFold() {
         this.FoldButton.setDisable(true);
     }
-    private void enableButtonCall(){
+
+    private void enableButtonCall() {
         this.CallButton.setDisable(false);
     }
 
-    private void enableButtonCheck(){
+    private void enableButtonCheck() {
         this.CheckButton.setDisable(false);
     }
-    private void enableButtonRaise(){
+
+    private void enableButtonRaise() {
         this.RaiseButton.setDisable(false);
     }
 
-    private void enableButtonFold(){
+    private void enableButtonFold() {
         this.FoldButton.setDisable(false);
     }
 
-    private void hideButtonCheck(){
+    private void hideButtonCheck() {
         this.CheckButton.setVisible(false);
     }
 
-    private void showButtonCheck(){
+    private void showButtonCheck() {
         this.CheckButton.setVisible(true);
     }
-    private void hideButtonCall(){
+
+    private void hideButtonCall() {
         this.CallButton.setVisible(false);
     }
 
-    private void showButtonCall(){
+    private void showButtonCall() {
         this.CallButton.setVisible(true);
     }
 
-    private void showUserMoveText(String text){
+    private void showUserMoveText(String text) {
         this.yourMove.setText(text);
         this.yourMove.setVisible(true);
     }
 
-    private void hideUserText(){
+    private void hideUserText() {
         this.yourMove.setVisible(false);
     }
 
-    private void hideAllUsersMoves(){
+    private void hideAllUsersMoves() {
         for (Map.Entry<Player, PlayerFields> set : playersFields.entrySet()) {
             set.getValue().hideUserText();
         }
     }
 
-    public void hideWinner(){
+    public void hideWinner() {
         this.blackRectangle.setVisible(false);
         this.winnerImage.setVisible(false);
         this.winnerLabel.setVisible(false);
     }
 
-    public void showWinner(String username){
+    public void showWinner(String username, Player player, Karta card1, Karta card2) {
         this.blackRectangle.setVisible(true);
         this.winnerLabel.setText(username + " wins");
         this.winnerImage.setVisible(true);
         this.winnerLabel.setVisible(true);
+        try {
+            playersFields.get(player).setFirstCard(card1);
+            playersFields.get(player).setSecondCard(card2);
+            playersFields.get(player).turnOver();
+        } catch (NullPointerException e) {
+            System.out.println("problem przy identyfikacji kart uzytkownika");
+        }
     }
 
 }

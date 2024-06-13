@@ -16,13 +16,12 @@ public class FutureTaskCallback extends FutureTask<HashMap<ClientHandler, Intege
         super(callable);
     }
 
-    public void done(){
+    public void done() {
         if (isCancelled()) System.out.println("gra przerwana ;{");
-        else{
+        else {
             try {
                 HashMap<ClientHandler, Integer> chMap = get();
                 for (Map.Entry<ClientHandler, Integer> set : chMap.entrySet()) {
-                    System.out.println("wynik z wątku wynikowego: " + set.getKey() + ": " + set.getValue());
                     Statement st = connection.createStatement();
                     String sql = "UPDATE pokerRanking SET Points = Points + " + "'" + set.getValue() + "'" + "WHERE UserID = " + "'" + set.getKey().getPlayer().getPlayerID() + "'";
                     st.executeUpdate(sql);

@@ -16,7 +16,10 @@
         <Button fx:id="LogoutButton" layoutX="906.0" layoutY="682.0" mnemonicParsing="false" onAction="#leaveGame" prefHeight="52.0" prefWidth="143.0" style="-fx-background-color: transparent; -fx-border-color: red; -fx-border-width: 3; -fx-border-radius: 1;" text="Leave" textFill="#d71a1a">
          <font>
             <Font name="Microsoft YaHei Bold" size="21.0" />
-         </font></Button>
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></Button>
       <Label lineSpacing="10.0" prefHeight="74.0" prefWidth="1257.0" text=" GAME LOBBY" textFill="#e4e4e4">
          <font>
             <Font name="Microsoft YaHei Bold" size="34.0" />
@@ -46,6 +49,9 @@
       <Button fx:id="ReadyButton" layoutX="1081.0" layoutY="682.0" mnemonicParsing="false" onAction="#ready" prefHeight="52.0" prefWidth="143.0" style="-fx-background-color: transparent; -fx-border-width: 3; -fx-border-color: lightgreen; -fx-border-radius: 1;" text="Ready" textFill="#39df1f">
          <font>
             <Font name="Microsoft YaHei Bold" size="20.0" />
-         </font></Button>
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></Button>
     </children>
 </AnchorPane>

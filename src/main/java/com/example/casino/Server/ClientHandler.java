@@ -105,7 +105,6 @@ public class ClientHandler extends Thread {
                             Integer userID = rs.getInt(1);
                             String password = rs.getString(2);
                             String salt = rs.getString(3);
-                            System.out.println(password);
                             if (PassHash.comparePasswd(passw, salt, password) && GameServer.checkAvailability(username)) {
                                 player = new Player(userID, username, false);
                                 GameServer.addNick(username);
@@ -133,7 +132,6 @@ public class ClientHandler extends Thread {
                 String date = registerRequest.getDate();
                 String passw = registerRequest.getPassword();   //zahashowane
                 String slt = registerRequest.getSalt();
-                System.out.println(data);
                 try {
                     Statement st = connection.createStatement();
                     ResultSet rs = st.executeQuery("select * from users where Email='" + email + "'");
@@ -157,7 +155,6 @@ public class ClientHandler extends Thread {
                         if (rs.next()) {
                             Integer userID = rs.getInt(1);
                             player = new Player(userID, username, false);
-                            System.out.println("rejestracja jest spoko ok");
                             GameServer.addNick(username);
                             sql = "INSERT INTO pokerRanking (UserID, Points) " +
                                     "VALUES (?,?)";
@@ -232,9 +229,9 @@ public class ClientHandler extends Thread {
                         sendPacket(new JoinGamePacket("LEFT", joinRequest.getUUID(),
                                 JoinGamePacket.GameType.POKER, JoinGamePacket.Status.LEFT));
                     } else {
-                        if (game.players.size() == 5){
+                        if (game.players.size() == 5) {
                             System.out.println("pełne lobby");
-                        }else {
+                        } else {
                             game.broadcast(new JoinGamePacket("USERJOINED", joinRequest.getUUID(),
                                     JoinGamePacket.GameType.POKER, this.player, JoinGamePacket.Status.USER_JOIN));
                             game.players.add(this);
@@ -282,7 +279,7 @@ public class ClientHandler extends Thread {
                 GameReadyPacket.GameType gameType = gameReadyRequest.getGameType();
                 if (gameType.equals(GameReadyPacket.GameType.POKER)) {
                     if (status.equals(GameReadyPacket.Status.READY)) {
-                        System.out.println(++GameServer.pokerGames.get(uuid).playersReady);
+                        GameServer.pokerGames.get(uuid).playersReady++;
                         player.setReady(true);
                         GameServer.pokerGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType,
                                 player, uuid, GameReadyPacket.Status.READY));
@@ -298,17 +295,12 @@ public class ClientHandler extends Thread {
                     }
                 } else {
                     if (status.equals(GameReadyPacket.Status.READY)) {
-                        System.out.println(++GameServer.rummyGames.get(uuid).playersReady);
+                        GameServer.rummyGames.get(uuid).playersReady++;
                         player.setReady(true);
                         GameServer.rummyGames.get(uuid).broadcast(new GameReadyPacket("ready", gameType,
                                 player, uuid, GameReadyPacket.Status.READY));
                         if (GameServer.rummyGames.get(uuid).playersReady == 2) {
                             Future<Player> future = GameServer.executorService.submit(GameServer.rummyGames.get(uuid));
-                            try {
-                                System.out.println(future.get().getPlayerData());
-                            } catch (InterruptedException | ExecutionException e) {
-                                throw new RuntimeException(e);
-                            }
                         }
                     } else {
                         GameServer.rummyGames.get(uuid).playersReady--;
@@ -322,30 +314,25 @@ public class ClientHandler extends Thread {
             case GAME: {
                 GamePacket gamePacket = (GamePacket) request;
                 GamePacket.Status gamePacketStatus = gamePacket.getStatus();
-                System.out.println("odebrano pakiet game");
                 if (gamePacketStatus.equals(GamePacket.Status.MOVE)) {
-                    System.out.println("odebrano pakiet move");
-                    System.out.println("1.");
                     switch (gamePacket.getMove_type()) {
                         case FOLD -> GameServer.pokerGames.get(UUID).handlerFold(this);
                         case CALL -> GameServer.pokerGames.get(UUID).handlerCall(this);
                         case RAISE -> GameServer.pokerGames.get(UUID).handlerRaise(this, 50);
                     }
                     GameServer.pokerGames.get(this.UUID).unlockLock();
-                    System.out.println("2.");
                 }
                 break;
 
             }
-            case RANKING:{
-                RankingPacket rankingPacket  = (RankingPacket) request;
+            case RANKING: {
+                RankingPacket rankingPacket = (RankingPacket) request;
                 RankingPacket.Status rankingPacketStatus = rankingPacket.getStatus();
-                System.out.println("odrbrano pakiet ranking");
-                if(rankingPacketStatus.equals(RankingPacket.Status.POKER)){
-                    HashMap<String,Integer> pokerRankingMap = new HashMap<>();
+                if (rankingPacketStatus.equals(RankingPacket.Status.POKER)) {
+                    HashMap<String, Integer> pokerRankingMap = new HashMap<>();
 
                     try {
-                        Statement st= connection.createStatement();
+                        Statement st = connection.createStatement();
                         ResultSet rs = st.executeQuery("SELECT users.username, pokerRanking.Points FROM pokerRanking JOIN users USING(UserID) ORDER BY pokerRanking.Points DESC LIMIT 10");
 
                         while (rs.next()) {
@@ -359,10 +346,10 @@ public class ClientHandler extends Thread {
                     }
                     sendPacket(new RankingPacket("Switching to Poker Ranking", RankingPacket.Status.POKER, pokerRankingMap));
                 } else if (rankingPacketStatus.equals(RankingPacket.Status.REMIK)) {
-                    HashMap<String,Integer> remikRankingMap = new HashMap<>();
+                    HashMap<String, Integer> remikRankingMap = new HashMap<>();
 
                     try {
-                        Statement st= connection.createStatement();
+                        Statement st = connection.createStatement();
                         ResultSet rs = st.executeQuery("SELECT users.username, rummyRanking.Points FROM rummyRanking JOIN users USING(UserID) ORDER BY rummyRanking.Points DESC LIMIT 10"); //do zmiany na remik
 
                         while (rs.next()) {

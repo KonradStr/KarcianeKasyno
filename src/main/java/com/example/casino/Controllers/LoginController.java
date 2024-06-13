@@ -50,7 +50,6 @@ public class LoginController implements Initializable {
         } else {
             Packet p = new LoginPacket("Próba logowania", login, password, LoginPacket.Status.LOGIN);
             Main.client.sendPacket(p);
-            System.out.println("wyslano pakiet logowania");
         }
     }
 

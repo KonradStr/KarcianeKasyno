@@ -37,7 +37,6 @@ public class MenuController {
     @FXML
     public void createPokerGame() {
         String uniqueID = UUID.randomUUID().toString();
-        System.out.println(uniqueID);
         Packet p = new CreateGamePacket("game creation", uniqueID, CreateGamePacket.GameType.POKER);
         Main.client.sendPacket(p);
     }
@@ -45,7 +44,6 @@ public class MenuController {
     @FXML
     public void createRummyGame() {
         String uniqueID = UUID.randomUUID().toString();
-        System.out.println(uniqueID);
         Packet p = new CreateGamePacket("game creation", uniqueID, CreateGamePacket.GameType.RUMMY);
         Main.client.sendPacket(p);
     }
@@ -54,7 +52,7 @@ public class MenuController {
     public void joinPokerGame() {
         String uuid = gameID.getText();
         if (uuid.isEmpty()) {
-            System.out.println("tutaj error");
+            System.out.println("Nie podano kodu");
         } else {
             JoinGamePacket packet = new JoinGamePacket("JOIN", uuid, JoinGamePacket.GameType.POKER, JoinGamePacket.Status.JOIN);
             Main.client.sendPacket(packet);
@@ -65,7 +63,7 @@ public class MenuController {
     public void joinRummyGame() {
         String uuid = gameID1.getText();
         if (uuid.isEmpty()) {
-            System.out.println("tutaj error");
+            System.out.println("Nie podano kodu");
         } else {
             JoinGamePacket packet = new JoinGamePacket("JOIN", uuid, JoinGamePacket.GameType.RUMMY, JoinGamePacket.Status.JOIN);
             Main.client.sendPacket(packet);
@@ -78,12 +76,12 @@ public class MenuController {
     }
 
     @FXML
-    public void goToPokerRanking(){
+    public void goToPokerRanking() {
         Main.client.sendPacket(new RankingPacket("Switching to Poker Ranking", RankingPacket.Status.POKER));
     }
 
     @FXML
-    public void goToRemikRanking(){
+    public void goToRemikRanking() {
         Main.client.sendPacket(new RankingPacket("Switching to Remik Ranking", RankingPacket.Status.REMIK));
 
     }

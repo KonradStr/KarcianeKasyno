@@ -5,7 +5,6 @@ import com.example.casino.Main;
 import com.example.casino.Packets.GameReadyPacket;
 import com.example.casino.Packets.JoinGamePacket;
 import com.example.casino.Player;
-import com.example.casino.Server.PokerGame;
 import com.example.casino.Server.RummyGame;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -51,7 +50,6 @@ public class RummyLobbyController {
         for (Map.Entry<Integer, Player> p : this.players.entrySet()) {
             Integer playerID = p.getKey();
             Player player = p.getValue();
-            System.out.println("Lc: " + player.getPlayerData());
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader();
                 fxmlLoader.setLocation(getClass().getResource("/com/example/casino/MiniPlayer.fxml"));

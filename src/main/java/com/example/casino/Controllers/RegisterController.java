@@ -47,7 +47,6 @@ public class RegisterController implements Initializable {
     @FXML
     private void register() throws NoSuchAlgorithmException, InvalidKeySpecException,
             ExecutionException, InterruptedException {
-        System.out.println("klienieto przycisk");
         String email = emailField.getText();
         String login = usernameField.getText();
         LocalDate dateTemp = birthDatePicker.getValue();
@@ -56,7 +55,6 @@ public class RegisterController implements Initializable {
         String date = String.valueOf(dateTemp);
 
         String password = passwordField.getText();
-        System.out.println(email + login + date + password);
         if (login.isEmpty() || password.isEmpty() || email.isEmpty() || date.isEmpty()) {
             enableErr("NIE PODANO WSZYSTKICH DANYCH");
         } else if (!isOver18(dateTemp)) {

@@ -36,7 +36,6 @@ public class RummyGame implements Callable<Player> {
 
     public void broadcast(Packet packet) {
         for (ClientHandler ch : players) {
-            System.out.println("ch" + ch.toString());
             ch.sendPacket(packet);
         }
     }
@@ -56,8 +55,6 @@ public class RummyGame implements Callable<Player> {
                 otherPlayers.add(playersData.get(k));
             }
 
-            System.out.println("ch.getPlayer(): " + ch.getPlayer());
-            System.out.println("otherPlayers:" + otherPlayers);
             broadcast(new RemikPacket("Game Starting", RemikPacket.Status.START, ch.getPlayer(), otherPlayers));
 
         }

@@ -1,6 +1,7 @@
 package com.example.casino.Controllers;
 
 import com.example.casino.Player;
+import com.example.casino.Server.Karta;
 import com.example.casino.Server.Rank;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -52,21 +53,21 @@ public class PlayerFields {
         return money.getText();
     }
 
-    public void showUserMoveText(String text){
+    public void showUserMoveText(String text) {
         move.setText(text);
         move.setVisible(true);
     }
 
-    public void hideUserText(){
+    public void hideUserText() {
         move.setVisible(false);
     }
 
-    public void turnOver(){
+    public void turnOver() {
         this.firstCard.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + firstCardRank + firstCardColor + ".png")));
-        this.secondCard.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + firstCardRank + firstCardColor + ".png")));
+        this.secondCard.setImage(new Image(getClass().getResourceAsStream("/images/cards/" + secondCardRank + secondCardColor + ".png")));
     }
 
-    public void folded(){
+    public void folded() {
         this.secondCard.setOpacity(0.7);
         this.firstCard.setOpacity(0.7);
         this.username.setOpacity(0.7);
@@ -75,6 +76,17 @@ public class PlayerFields {
         this.move.setText("FOLDED");
         this.move.setTextFill(Paint.valueOf("red"));
         this.move.setVisible(true);
+    }
+
+    public void setFirstCard(Karta card) {
+        this.firstCardRank = Rank.rank.get(card.rank.toString());
+        this.firstCardColor = card.kolor.toString();
+    }
+
+    public void setSecondCard(Karta card) {
+        this.secondCardRank = Rank.rank.get(card.rank.toString());
+        this.secondCardColor = card.kolor.toString();
+
     }
 }
 

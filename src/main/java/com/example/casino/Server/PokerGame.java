@@ -23,31 +23,54 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
     final Condition next = lock.newCondition();
     Integer currentBid;
     Integer moneyPool;
+    boolean isBankrupt = false;
 
     List<ClientHandler> recentWinners = new ArrayList<>();
+
     public void handlerRaiseBetween(ClientHandler ch, Integer r) {
         if (ch.getPlayer().curBid < currentBid) {
-            ch.getPlayer().money -= (currentBid - ch.getPlayer().curBid);
+            if (currentBid - ch.getPlayer().curBid > ch.getPlayer().money) {
+                ch.getPlayer().money = 0;
+                isBankrupt = true;
+            } else {
+                ch.getPlayer().money -= (currentBid - ch.getPlayer().curBid);
+            }
         }
         currentBid += r;
-        moneyPool+=currentBid - ch.getPlayer().curBid;
+        if (r > ch.getPlayer().money) {
+            moneyPool += ch.getPlayer().money;
+            ch.getPlayer().money = 0;
+            isBankrupt = true;
+        } else {
+            moneyPool += currentBid - ch.getPlayer().curBid;
+            ch.getPlayer().money -= r;
+        }
         ch.getPlayer().curBid = currentBid;
-        ch.getPlayer().money -= r;
     }
 
     public void handlerRaise(ClientHandler ch, Integer r) {
         if (ch.getPlayer().curBid < currentBid) {
-            ch.getPlayer().money -= (currentBid - ch.getPlayer().curBid);
+            if (currentBid - ch.getPlayer().curBid > ch.getPlayer().money) {
+                ch.getPlayer().money = 0;
+                isBankrupt = true;
+            } else {
+                ch.getPlayer().money -= (currentBid - ch.getPlayer().curBid);
+            }
         }
         currentBid += r;
-        moneyPool+=currentBid - ch.getPlayer().curBid;
+        if (r > ch.getPlayer().money) {
+            isBankrupt = true;
+            moneyPool += ch.getPlayer().money;
+            ch.getPlayer().money = 0;
+        } else {
+            moneyPool += currentBid - ch.getPlayer().curBid;
+            ch.getPlayer().money -= r;
+        }
         ch.getPlayer().curBid = currentBid;
-        ch.getPlayer().money -= r;
 
-        System.out.println("moni: " + ch.getPlayer().money + " bid: " + ch.getPlayer().curBid + " pool: " + moneyPool + "cuurBid: " + currentBid);
 
-        for (ClientHandler chInner: players){
-            if (!ch.equals(chInner)){
+        for (ClientHandler chInner : players) {
+            if (!ch.equals(chInner)) {
                 chInner.sendPacket(new GamePacket("other user called", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.RAISE, ch.getPlayer(), ch.getPlayer().money));
             }
         }
@@ -55,14 +78,19 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
 
     public void handlerCall(ClientHandler ch) {
         if (ch.getPlayer().curBid < currentBid) {
-            ch.getPlayer().money -= currentBid - ch.getPlayer().curBid;
-            moneyPool += currentBid - ch.getPlayer().curBid;
+            if (currentBid - ch.getPlayer().curBid > ch.getPlayer().money) {
+                isBankrupt = true;
+                moneyPool += ch.getPlayer().money;
+                ch.getPlayer().money = 0;
+            } else {
+                ch.getPlayer().money -= currentBid - ch.getPlayer().curBid;
+                moneyPool += currentBid - ch.getPlayer().curBid;
+            }
         }
         ch.getPlayer().curBid = currentBid;
 
-        System.out.println("moni: " + ch.getPlayer().money + " bid: " + ch.getPlayer().curBid + " pool: " + moneyPool+ "cuurBid: " + currentBid);
-        for (ClientHandler chInner: players){
-            if (!ch.equals(chInner)){
+        for (ClientHandler chInner : players) {
+            if (!ch.equals(chInner)) {
                 chInner.sendPacket(new GamePacket("other user called", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, ch.getPlayer(), ch.getPlayer().money));
             }
         }
@@ -70,8 +98,8 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
 
     public void handlerFold(ClientHandler ch) {
         ch.getPlayer().pass();
-        for (ClientHandler chInner: players){
-            if (!ch.equals(chInner)){
+        for (ClientHandler chInner : players) {
+            if (!ch.equals(chInner)) {
                 chInner.sendPacket(new GamePacket("other user called", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.FOLD, ch.getPlayer(), ch.getPlayer().money));
             }
         }
@@ -113,7 +141,6 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
                 ret.add(ch);
 
         }
-        System.out.println(ret);
         return ret;
     }
 
@@ -146,13 +173,13 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
 
     public void broadcast(Packet packet) {
         for (ClientHandler ch : players) {
-            System.out.println("ch" + ch.toString());
             ch.sendPacket(packet);
         }
     }
 
 
     private void deal(boolean isFirstRound) throws InterruptedException {
+        this.isBankrupt = false;
         this.tableCards = new ArrayList<>();
         talia = new Talia(false);
         talia.SzuflujTalie();
@@ -176,16 +203,9 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
                 otherPlayers.add(playersData.get(k));
             }
 
-            System.out.println("Dla:" + ch.getPlayer().getPlayerData());
-            for (Player p : otherPlayers) {
-                System.out.println(p.getPlayerData());
-            }
-
-            System.out.println("startuje gre");
             ch.sendPacket(new GamePacket("Game Starting",
                     GamePacket.Status.START, ch.getPlayer(), otherPlayers));
         }
-
 
 
         for (ClientHandler ch : players) {
@@ -217,7 +237,7 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
         HashMap<ClientHandler, Integer> finalPoints = new HashMap<>();
 
         for (int round = 0; round < 2; round++) {
-            deal(round==0);
+            deal(round == 0);
             Thread.sleep(1000);
             handlerRaiseBetween(players.get(0), 5);
             players.get(0).sendPacket(new GamePacket("small blind",
@@ -273,16 +293,16 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
             for (ClientHandler ch : players) {
                 if (ch.getPlayer().passedAway) temp--;
             }
-            if (temp <= 1) {
+            if (temp <= 1 || isBankrupt) {
                 recentWinners = Showdown();
-                for (ClientHandler winner : recentWinners){
-                    if (finalPoints.containsKey(winner)){
-                        finalPoints.put(winner, finalPoints.get(winner) + moneyPool/recentWinners.size());
-                    }else{
-                        finalPoints.put(winner, moneyPool/recentWinners.size());
+                for (ClientHandler winner : recentWinners) {
+                    if (finalPoints.containsKey(winner)) {
+                        finalPoints.put(winner, finalPoints.get(winner) + moneyPool / recentWinners.size());
+                    } else {
+                        finalPoints.put(winner, moneyPool / recentWinners.size());
                     }
                     broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER));
-                    Thread.sleep(5000);
+                    Thread.sleep(7000);
                 }
                 moneyPool = 0;
                 continue;
@@ -297,16 +317,18 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
             for (ClientHandler ch : players) {
                 if (ch.getPlayer().passedAway) temp--;
             }
-            if (temp <= 1) {
+            if (temp <= 1 || isBankrupt) {
                 recentWinners = Showdown();
-                for (ClientHandler winner : recentWinners){
-                    if (finalPoints.containsKey(winner)){
-                        finalPoints.put(winner, finalPoints.get(winner) + moneyPool/recentWinners.size());
-                    }else{
-                        finalPoints.put(winner, moneyPool/recentWinners.size());
+                for (ClientHandler winner : recentWinners) {
+                    if (finalPoints.containsKey(winner)) {
+                        finalPoints.put(winner, finalPoints.get(winner) + moneyPool / recentWinners.size());
+                    } else {
+                        finalPoints.put(winner, moneyPool / recentWinners.size());
                     }
-                    broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER));
-                    Thread.sleep(5000);
+
+                    broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER, winner.getPlayer(), winner.getPlayer().getCard1(), winner.getPlayer().getCard2()));
+
+                    Thread.sleep(7000);
                 }
                 moneyPool = 0;
                 continue;
@@ -319,14 +341,14 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
             players.addLast(players.removeFirst());
             playersData.addLast(playersData.removeFirst());
             recentWinners = Showdown();
-            for (ClientHandler winner : recentWinners){
-                if (finalPoints.containsKey(winner)){
-                    finalPoints.put(winner, finalPoints.get(winner) + moneyPool/recentWinners.size());
-                }else{
-                    finalPoints.put(winner, moneyPool/recentWinners.size());
+            for (ClientHandler winner : recentWinners) {
+                if (finalPoints.containsKey(winner)) {
+                    finalPoints.put(winner, finalPoints.get(winner) + moneyPool / recentWinners.size());
+                } else {
+                    finalPoints.put(winner, moneyPool / recentWinners.size());
                 }
-                broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER));
-                Thread.sleep(3000);
+                broadcast(new GamePacket(winner.getPlayer().getPlayerData(), GamePacket.Status.WINNER, winner.getPlayer(), winner.getPlayer().getCard1(), winner.getPlayer().getCard2()));
+                Thread.sleep(7000);
             }
 
             moneyPool = 0;
@@ -336,37 +358,38 @@ public class PokerGame implements Callable<HashMap<ClientHandler, Integer>> {
         return finalPoints;
     }
 
-        private void turn (boolean nextRound) throws InterruptedException {
-            if (nextRound) {
-                for (ClientHandler ch : players) {
-                    ch.getPlayer().curBid = 0;
-                }
-            }
-            while (!canProceed() || nextRound) {
-                for (int i = 0; i < playersData.size(); i++) {
-                    if (!playersData.get(i).passedAway) {
-                        if (currentBid - players.get(i).getPlayer().curBid == 0) {
-                            players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CHECK, currentBid - players.get(i).getPlayer().curBid));
-                        }else{
-                            players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid - players.get(i).getPlayer().curBid));
-                        }
-                        lock.lock();
-                        while (!nextPlayer) {
-                            next.await();
-                        }
-                        lock.unlock();
-                        nextPlayer = false;
-                    }
-                }
-                nextRound = false;
+    private void turn(boolean nextRound) throws InterruptedException {
+        if (nextRound) {
+            for (ClientHandler ch : players) {
+                ch.getPlayer().curBid = 0;
             }
         }
-
-
-        public void unlockLock () {
-            this.nextPlayer = true;
-            lock.lock();
-            this.next.signal();
-            lock.unlock();
+        while (!canProceed() || nextRound) {
+            for (int i = 0; i < playersData.size(); i++) {
+                if (!playersData.get(i).passedAway) {
+                    if (currentBid - players.get(i).getPlayer().curBid == 0) {
+                        players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CHECK, currentBid - players.get(i).getPlayer().curBid));
+                    } else {
+                        players.get(i).sendPacket(new GamePacket("your move", GamePacket.Status.MOVE, GamePacket.MOVE_TYPE.CALL, currentBid - players.get(i).getPlayer().curBid));
+                    }
+                    lock.lock();
+                    while (!nextPlayer) {
+                        next.await();
+                    }
+                    lock.unlock();
+                    nextPlayer = false;
+                }
+            }
+            nextRound = false;
+            if (this.isBankrupt) break;
         }
     }
+
+
+    public void unlockLock() {
+        this.nextPlayer = true;
+        lock.lock();
+        this.next.signal();
+        lock.unlock();
+    }
+}

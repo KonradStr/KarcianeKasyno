@@ -34,7 +34,7 @@ public class GamePacket extends Packet {
     private Integer cardindex;
     private Integer currentBid;
 
-    private Karta card;
+    private Karta card, card2;
     private List<Player> players;
 
     public GamePacket(String data) {
@@ -87,6 +87,14 @@ public class GamePacket extends Packet {
         this.cardindex = cardIndex;
     }
 
+    public GamePacket(String data, Status status, Player player, Karta card1, Karta card2) {
+        super(PacketType.GAME, data);
+        this.status = status;
+        this.card = card1;
+        this.card2 = card2;
+        this.player = player;
+    }
+
     public GamePacket(String data, Status status, Karta card) {
         super(PacketType.GAME, data);
         this.status = status;
@@ -99,6 +107,10 @@ public class GamePacket extends Packet {
 
     public Karta getCard() {
         return card;
+    }
+
+    public Karta getCard2() {
+        return card2;
     }
 
     public List<Player> getPlayers() {

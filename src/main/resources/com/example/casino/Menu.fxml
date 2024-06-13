@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
@@ -44,6 +45,9 @@
                      <StackPane.margin>
                         <Insets left="185.0" right="185.0" top="500.0" />
                      </StackPane.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                   <Button fx:id="JoinButton" mnemonicParsing="false" onAction="#joinPokerGame" prefHeight="48.0" prefWidth="300.0" style="-fx-background-radius: 30;" text="Dołącz" StackPane.alignment="TOP_CENTER">
                      <font>
@@ -52,6 +56,9 @@
                      <StackPane.margin>
                         <Insets left="185.0" right="185.0" top="390.0" />
                      </StackPane.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                   <TextField fx:id="gameID" alignment="CENTER" prefColumnCount="0" prefHeight="52.0" prefWidth="98.0" style="-fx-background-radius: 20;" StackPane.alignment="TOP_CENTER">
                      <StackPane.margin>
@@ -99,6 +106,9 @@
                      <StackPane.margin>
                         <Insets left="185.0" right="185.0" top="500.0" />
                      </StackPane.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                   <Button fx:id="JoinButton1" mnemonicParsing="false" onAction="#joinRummyGame" prefHeight="48.0" prefWidth="300.0" style="-fx-background-radius: 30;" text="Dołącz" StackPane.alignment="TOP_CENTER">
                      <font>
@@ -107,6 +117,9 @@
                      <StackPane.margin>
                         <Insets left="185.0" right="185.0" top="390.0" />
                      </StackPane.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                   <TextField fx:id="gameID1" alignment="CENTER" prefColumnCount="0" prefHeight="52.0" prefWidth="98.0" style="-fx-background-radius: 20;" StackPane.alignment="TOP_CENTER">
                      <StackPane.margin>
@@ -139,6 +152,9 @@
                      <StackPane.margin>
                         <Insets right="50.0" top="10.0" />
                      </StackPane.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                   <Button fx:id="exit" alignment="TOP_RIGHT" graphicTextGap="2.0" mnemonicParsing="false" onAction="#closeWindow" prefHeight="21.0" prefWidth="30.0" style="-fx-background-color: transparent;" text="x" textFill="WHITE" StackPane.alignment="TOP_RIGHT">
                      <font>
@@ -150,6 +166,9 @@
                      <StackPane.margin>
                         <Insets right="10.0" top="10.0" />
                      </StackPane.margin>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </Button>
                </children>
             </StackPane>
@@ -163,6 +182,9 @@
                      <image>
                         <Image url="@../../../images/puchar.png" />
                      </image>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </ImageView>
                </graphic>
                <StackPane.margin>
@@ -173,6 +195,9 @@
                <StackPane.margin>
                   <Insets bottom="30.0" />
                </StackPane.margin>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
             </Button>
             <Button fx:id="goToPokerRankingButton" mnemonicParsing="false" onAction="#goToPokerRanking" prefHeight="103.0" prefWidth="103.0" style="-fx-background-color: transparent;">
                <StackPane.margin>
@@ -183,6 +208,9 @@
                      <image>
                         <Image url="@../../../images/puchar.png" />
                      </image>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </ImageView>
                </graphic>
             </Button>

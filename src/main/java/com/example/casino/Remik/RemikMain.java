@@ -246,8 +246,6 @@ public class RemikMain {
             }
 
             routine();
-        } else {
-            System.out.println("Nie");
         }
 
     }
@@ -318,13 +316,11 @@ public class RemikMain {
     }
 
     private void displayCardsInHBox(HBox cardRow) {
-        System.out.println("Karty w tym HBox:");
         for (Node node : cardRow.getChildren()) {
             if (node instanceof ImageView) {
                 ImageView imageView = (ImageView) node;
                 RemikCard card = getCardFromImageView(imageView);
                 if (card != null) {
-                    System.out.println(card);
                 }
             }
         }
@@ -386,7 +382,6 @@ public class RemikMain {
                     // sortowanie kart w poszczegolnych hboxach
                     sortCardsInHBox(cardRow);
 
-                    System.out.println("Dodano kartę: " + selectedCard);
                 } else {
                     cardsInRow.remove(selectedCard);
                     System.out.println("Nie można dodać karty: " + selectedCard);
@@ -515,7 +510,6 @@ public class RemikMain {
             tryToLayOffButton.setDisable(true);
         }
 
-        //System.out.println(playersTurn);
     }
 
     private void discardSelectedCard() {

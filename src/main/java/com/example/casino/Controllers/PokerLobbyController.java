@@ -50,7 +50,6 @@ public class PokerLobbyController {
         for (Map.Entry<Integer, Player> p : this.players.entrySet()) {
             Integer playerID = p.getKey();
             Player player = p.getValue();
-            System.out.println("Lc: " + player.getPlayerData());
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader();
                 fxmlLoader.setLocation(getClass().getResource("/com/example/casino/MiniPlayer.fxml"));
